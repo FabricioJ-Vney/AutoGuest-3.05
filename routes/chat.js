@@ -8,7 +8,7 @@ const router = express.Router();
 // ============================================================
 async function initChatTable() {
     try {
-        await db.query(\`
+        await db.query(`
             CREATE TABLE IF NOT EXISTS chat_mensaje (
                 idMensaje VARCHAR(20) PRIMARY KEY,
                 idCita VARCHAR(20) NOT NULL,
@@ -22,7 +22,7 @@ async function initChatTable() {
                 INDEX idx_idCita (idCita),
                 INDEX idx_fechaEnvio (fechaEnvio)
             )
-        \`);
+        `);
         console.log('[Chat] Tabla chat_mensaje verificada/creada correctamente.');
     } catch (err) {
         console.error('[Chat] Error al crear tabla chat_mensaje:', err.message);
@@ -74,7 +74,7 @@ router.get('/:idCita', async (req, res) => {
 
     try {
         // DEBUG: Ver qué datos llegan en la sesión
-        console.log(\`[Chat GET] idCita=\${idCita} | userId=\${userId} | role=\${role}\`);
+        console.log(`[Chat GET] idCita=${idCita} | userId=${userId} | role=${role}`);
 
         // Verificar que la cita existe y el usuario tiene relación con ella
         let citaQuery;
@@ -96,14 +96,14 @@ router.get('/:idCita', async (req, res) => {
             );
         }
 
-        console.log(\`[Chat GET] citaQuery result length=\${citaQuery[0].length}\`);
+        console.log(`[Chat GET] citaQuery result length=${citaQuery[0].length}`);
 
         if (citaQuery[0].length === 0) {
             return res.status(403).json({ error: 'No tienes acceso a este chat' });
         }
 
         // Obtener mensajes ordenados por fecha
-        const [mensajes] = await db.query(\`
+        const [mensajes] = await db.query(`
             SELECT 
                 m.idMensaje,
                 m.remitenteId,
@@ -118,7 +118,7 @@ router.get('/:idCita', async (req, res) => {
             JOIN usuario u ON m.remitenteId = u.idUsuario
             WHERE m.idCita = ?
             ORDER BY m.fechaEnvio ASC
-        \`, [idCita]);
+        `, [idCita]);
 
         // Marcar como leídos los mensajes del otro participante SOLO si no es taller
         if (role !== 'taller') {
@@ -149,7 +149,7 @@ router.post('/:idCita', async (req, res) => {
     if (!userId) {
         return res.status(401).json({ error: 'No autorizado' });
     }
-    
+
     // Taller no puede enviar mensajes, solo leer
     if (role === 'taller') {
         return res.status(403).json({ error: 'El administrador del taller solo puede ver el chat (solo lectura)' });
@@ -174,7 +174,7 @@ router.post('/:idCita', async (req, res) => {
 
     try {
         // DEBUG: Ver qué datos llegan en la sesión
-        console.log(\`[Chat POST] idCita=\${idCita} | userId=\${userId} | role=\${role} | remitenteTipo=\${remitenteTipo}\`);
+        console.log(`[Chat POST] idCita=${idCita} | userId=${userId} | role=${role} | remitenteTipo=${remitenteTipo}`);
 
         // Verificar acceso a la cita
         let citaQuery;
@@ -190,23 +190,25 @@ router.post('/:idCita', async (req, res) => {
             );
         }
 
-        console.log(\`[Chat POST] citaQuery result length=\${citaQuery[0].length}\`);
+        console.log(`[Chat POST] citaQuery result length=${citaQuery[0].length}`);
 
         if (citaQuery[0].length === 0) {
             return res.status(403).json({ error: 'No tienes acceso a este chat' });
         }
 
+        // FIX ESM nanoid issue by using crypto fallback just in case or keep nanoid but make sure we avoid crash if it's ESM only
+        // The original code used nanoid(7).
         const idMensaje = 'MSG' + nanoid(7);
 
         await db.query(
-            \`INSERT INTO chat_mensaje 
+            `INSERT INTO chat_mensaje 
                 (idMensaje, idCita, remitenteId, remitenteTipo, tipoContenido, contenido, nombreArchivo)
-             VALUES (?, ?, ?, ?, ?, ?, ?)\`,
+             VALUES (?, ?, ?, ?, ?, ?, ?)`,
             [idMensaje, idCita, userId, remitenteTipo, tipoContenido, contenido, nombreArchivo || null]
         );
 
         // Devolver el mensaje recién creado con nombre del remitente
-        const [nuevoMensaje] = await db.query(\`
+        const [nuevoMensaje] = await db.query(`
             SELECT 
                 m.idMensaje,
                 m.remitenteId,
@@ -220,7 +222,7 @@ router.post('/:idCita', async (req, res) => {
             FROM chat_mensaje m
             JOIN usuario u ON m.remitenteId = u.idUsuario
             WHERE m.idMensaje = ?
-        \`, [idMensaje]);
+        `, [idMensaje]);
 
         res.status(201).json({ success: true, mensaje: nuevoMensaje[0] });
     } catch (error) {

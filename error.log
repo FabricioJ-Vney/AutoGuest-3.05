@@ -1,0 +1,6 @@
+[dotenv@17.2.3] injecting env (11) from .env -- tip: 🔄 add secrets lifecycle management: https://dotenvx.com/ops
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 🔐 prevent committing .env to code: https://dotenvx.com/precommit
+Servidor corriendo en http://localhost:3000
+Conexión a la base de datos establecida con éxito.
+[Chat] Tabla chat_mensaje verificada/creada correctamente.
+^C
