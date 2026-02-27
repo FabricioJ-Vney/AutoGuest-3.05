@@ -158,11 +158,21 @@
         <a href="home.html">
             <img src="imagenes/Logo_Autoguest.png" alt="Logo de AutoGuest" class="logo">
         </a>
-        <div class="header-info">
-            <h2 id="workshopName">Mecánica Rápida S.L.</h2>
-            <p>Portal de Taller</p>
+        <div class="header-info" style="display: flex; gap: 20px; align-items: center;">
+            <div style="text-align: right; margin-right: 20px;">
+                <h2 id="workshopName">Mecánica Rápida S.L.</h2>
+                <p>Portal de Taller</p>
+            </div>
+
+            <a href="pages/taller/perfil_taller.html" title="Perfil del Taller"
+                style="color: #f39c12; font-size: 1.8em; text-decoration: none; transition: transform 0.2s;"><i
+                    class="fas fa-user-circle"></i></a>
+            <a href="ajustes_taller.html" title="Ajustes"
+                style="color: #f39c12; font-size: 1.8em; text-decoration: none; transition: transform 0.2s;"><i
+                    class="fas fa-cog"></i></a>
+
+            <a href="index.html" class="logout-btn" style="margin-left: 15px;">Cerrar Sesión</a>
         </div>
-        <a href="index.html" class="logout-btn">Cerrar Sesión</a>
     </header>
 
     <main class="portal-container">
@@ -171,25 +181,13 @@
             <div class="kpi-card"><i class="fas fa-calendar-check kpi-icon"></i>
                 <div class="kpi-info">
                     <h3 id="citas-hoy-count">0</h3>
-                    <p>Citas para Hoy</p>
+                    <p>Citas en Proceso Hoy</p>
                 </div>
             </div>
             <div class="kpi-card"><i class="fas fa-users-cog kpi-icon"></i>
                 <div class="kpi-info">
                     <h3 id="mecanicos-count">0</h3>
-                    <p>Mecánicos</p>
-                </div>
-            </div>
-            <div class="kpi-card"><i class="fas fa-star kpi-icon"></i>
-                <div class="kpi-info">
-                    <h3 id="valoracion-media">--</h3>
-                    <p>Valoración Media</p>
-                </div>
-            </div>
-            <div class="kpi-card"><i class="fas fa-users kpi-icon"></i>
-                <div class="kpi-info">
-                    <h3 id="clientes-count">0</h3>
-                    <p>Clientes (Total)</p>
+                    <p>Mecánicos Activos</p>
                 </div>
             </div>
         </section>
@@ -204,14 +202,10 @@
                 <h3>Administrar Servicios</h3>
                 <p>Define, actualiza y gestiona los servicios que ofreces y sus precios.</p>
             </a>
-            <a href="pages/taller/ver_resenas.html" class="action-card"><i class="fas fa-comments action-icon"></i>
-                <h3>Ver Reseñas</h3>
-                <p>Consulta las opiniones y valoraciones que han dejado tus clientes.</p>
-            </a>
-            <a href="pages/taller/reportes_estadisticas.html" class="action-card"><i
-                    class="fas fa-chart-line action-icon"></i>
-                <h3>Reportes y Estadísticas</h3>
-                <p>Analiza el rendimiento de tu negocio con reportes detallados.</p>
+            <a href="pages/taller/gestionar_mecanicos.html" class="action-card"><i
+                    class="fas fa-users-cog action-icon"></i>
+                <h3>Gestionar Mecánicos</h3>
+                <p>Ver solicitudes de mecánicos y administra el personal activo de tu taller.</p>
             </a>
         </section>
     </main>
@@ -228,8 +222,6 @@
                 window.location.href = 'login_taller.html';
                 return;
             }
-
-            // ... dentro del script de portal_taller.html ...
 
             // 2. Personalizar el nombre
             const tallerName = sessionStorage.getItem('tallerName'); // Leemos el nombre del negocio
@@ -259,22 +251,22 @@
             // 4. Cargar Estadísticas
             async function loadStats() {
                 try {
+                    // Update to match new admin endpoint instead of /api/taller/stats which might return different things,
+                    // but keeping it simple for now, we'll only use mecanicos count.
                     const res = await fetch('/api/taller/stats');
                     if (res.ok) {
                         const data = await res.json();
                         if (document.getElementById('mecanicos-count'))
                             document.getElementById('mecanicos-count').textContent = data.mecanicos;
-                        if (document.getElementById('clientes-count'))
-                            document.getElementById('clientes-count').textContent = data.clientes;
+                        // Clientes was removed from UI
                     }
                 } catch (e) { console.error("Error loading stats", e); }
             }
             loadStats();
         });
     </script>
-    <script src="pages/taller/citas-admin.js"></script>`n
-    <script src="pages/taller/clientes-admin.js"></script>`n
-    <script src="pages/taller/resenas-admin.js"></script>`n
+    <script src="pages/taller/citas-admin.js"></script>
+    <script src="http://localhost:3000/js/global_nav.js"></script>
 </body>
 
 </html>

@@ -8,7 +8,7 @@ const router = express.Router();
 router.get('/', async (req, res) => {
     try {
         // Esta consulta trae los 50 talleres de tu base de datos
-        const [rows] = await db.query('SELECT idTaller, nombre, direccion FROM taller');
+        const [rows] = await db.query('SELECT idTaller, nombre, direccion, foto_perfil FROM taller');
         res.json(rows);
     } catch (error) {
         console.error('Error al obtener talleres:', error);

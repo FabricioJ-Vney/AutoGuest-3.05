@@ -22,12 +22,18 @@ const tallerAdminRoutes = require('./routes/taller_admin');
 const mecanicoRoutes = require('./routes/auth_mecanico');
 const inventarioRoutes = require('./routes/inventario');
 const chatRoutes = require('./routes/chat');
+const ticketsRoutes = require('./routes/tickets'); // <--- Importar tickets
+const notificacionesRoutes = require('./routes/notificaciones'); // <--- Notificaciones
 
 // 3. Inicializar la aplicación de Express
 const app = express();
 
 // 4. Middlewares
-app.use(cors()); // Usar CORS para permitir peticiones
+app.use(cors({
+    origin: ['http://127.0.0.1:5500', 'http://localhost:5500'], // Ambos puertos posibles del Live Server
+    credentials: true, // Permitir el envío de cookies de sesión cross-origin
+    allowedHeaders: ['Content-Type', 'Authorization', 'Accept']
+}));
 app.use(express.json()); // Para poder entender JSON en el cuerpo de las peticiones
 
 // Configuración de express-session
@@ -69,9 +75,11 @@ app.use('/api/perfil', perfilRoutes);
 app.use('/api/resenas', resenasRoutes);
 app.use('/api/inventario', inventarioRoutes);
 app.use('/api/chat', chatRoutes);
+app.use('/api/tickets', ticketsRoutes); // <--- Rutas de tickets
 
 app.use('/api/mecanico', mecanicoRoutes);
 app.use('/api/taller/citas', require('./routes/taller_citas'));
+app.use('/api/notificaciones', notificacionesRoutes); // <--- Notificaciones
 
 
 // 5. Rutas

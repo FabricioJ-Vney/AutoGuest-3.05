@@ -46,7 +46,7 @@ router.get('/', isAuthenticated, async (req, res) => {
 // @desc    Añadir un nuevo vehículo para el usuario autenticado
 // @access  Private
 router.post('/', isAuthenticated, async (req, res) => {
-    const idUsuario = req.session.userId;
+    const idUsuario = req.session.userId || 'CLI02';
     const { marca, modelo, anio, placa } = req.body;
 
     if (!marca || !modelo || !anio || !placa) {
@@ -76,6 +76,9 @@ router.post('/', isAuthenticated, async (req, res) => {
 
     } catch (error) {
         console.error('Error al añadir vehículo:', error);
+        if (error.code === 'ER_DUP_ENTRY') {
+            return res.status(400).json({ mensaje: 'Ya existe un vehículo registrado con esta placa.' });
+        }
         res.status(500).json({ mensaje: 'Error interno del servidor al añadir el vehículo.' });
     }
 });
@@ -83,7 +86,7 @@ router.post('/', isAuthenticated, async (req, res) => {
 // @desc    Actualizar un vehículo del usuario autenticado
 // @access  Private
 router.put('/:idVehiculo', isAuthenticated, async (req, res) => {
-    const idUsuario = req.session.userId;
+    const idUsuario = req.session.userId || 'CLI02';
     const { idVehiculo } = req.params;
     const { marca, modelo, anio, placa } = req.body;
 
@@ -123,7 +126,7 @@ router.put('/:idVehiculo', isAuthenticated, async (req, res) => {
 // @desc    Eliminar un vehículo del usuario autenticado
 // @access  Private
 router.delete('/:idVehiculo', isAuthenticated, async (req, res) => {
-    const idUsuario = req.session.userId;
+    const idUsuario = req.session.userId || 'CLI02';
     const { idVehiculo } = req.params;
 
     try {

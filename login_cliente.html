@@ -59,6 +59,7 @@
             try {
                 const response = await fetch('http://localhost:3000/api/registro/login', {
                     method: 'POST',
+                    credentials: 'include', // REQUERIDO para guardar y enviar la cookie
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email, password })
                 });
@@ -85,6 +86,7 @@
             }
         });
     </script>
+    <script src="http://localhost:3000/js/global_nav.js"></script>
 </body>
 
 </html>

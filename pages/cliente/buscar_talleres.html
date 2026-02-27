@@ -238,20 +238,10 @@
 
 <body>
 
-    <header class="dashboard-header">
-        <div class="header-left">
-            <a href="dashboard_cliente.html">
-                <img src="../../../imagenes/Logo_Autoguest.png" alt="Logo de AutoGuest" class="logo">
-            </a>
-            <a href="dashboard_cliente.html" class="back-to-dashboard">
-                <i class="fas fa-arrow-left"></i>
-                <span>Volver al Panel</span>
-            </a>
-        </div>
-        <div class="header-right">
-            <div class="user-greeting">¡Hola!</div>
-            <a href="#" class="logout-btn">Cerrar Sesión</a>
-        </div>
+    <header class="simple-header" style="background: #2c2c2c; padding: 15px 40px; border-bottom: 1px solid #333;">
+        <a href="dashboard_cliente.html">
+            <img src="../../imagenes/Logo_Autoguest.png" alt="Logo de AutoGuest" class="logo" style="height: 90px;">
+        </a>
     </header>
 
     <main class="search-page-container">
@@ -287,7 +277,7 @@
             // 2. Saludo
             const userName = sessionStorage.getItem('userName');
             if (userName) {
-                document.querySelector('.user-greeting').textContent = `¡Hola, ${userName}!`;
+                let ug2 = document.querySelector('.user-greeting'); if(ug2) { ug2.textContent = `¡Hola, ${userName}!`; }
             }
 
             // 3. Logout
@@ -334,7 +324,7 @@
 
             try {
                 contenedor.innerHTML = '<p style="color:white; width:100%; text-align:center;">Cargando talleres...</p>';
-                const response = await fetch('/api/talleres');
+                const response = await fetch('http://localhost:3000/api/talleres');
                 if (!response.ok) throw new Error('Error de conexión');
 
                 listaTalleres = await response.json();
@@ -366,13 +356,14 @@
                     'https://images.unsplash.com/photo-1487754180451-c456f719a1fc?w=400&h=250&fit=crop', // Taller mecánico 5
                 ];
 
-                // Seleccionar imagen de forma cíclica para variedad
-                const imagen = imagenesWorkshop[index % imagenesWorkshop.length];
+                // Seleccionar imagen de forma cíclica para variedad (o foto propia del taller si existe)
+                const imagenDefault = imagenesWorkshop[index % imagenesWorkshop.length];
+                const imagen = taller.foto_perfil ? taller.foto_perfil : imagenDefault;
 
                 const card = `
                     <div class="search-result-card">
                         <div class="card-image">
-                            <img src="${imagen}" alt="${taller.nombre}" style="width:100%; height:100%; object-fit:cover;">
+                            <img src="${imagen}" alt="${taller.nombre}" onerror="this.src='${imagenDefault}'" style="width:100%; height:100%; object-fit:cover;">
                         </div>
                         <div class="card-content">
                             <h3>${taller.nombre}</h3>
@@ -401,6 +392,8 @@
 
 
 
+
+    <script src="http://localhost:3000/js/global_nav.js"></script>
 </body>
 
 </html>

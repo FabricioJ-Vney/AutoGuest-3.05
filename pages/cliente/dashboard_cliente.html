@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <link rel="stylesheet" href="../../style.css">
     <style>
-        /* Estilos especÃ­ficos para el dashboard del cliente */
+        /* Estilos específicos para el dashboard del cliente */
         .dashboard-container {
             max-width: 1200px;
             margin: 40px auto;
@@ -72,8 +72,7 @@
 
         .dashboard-content {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            /* Rejilla adaptable */
+            grid-template-columns: repeat(2, 1fr);
             gap: 30px;
         }
 
@@ -87,7 +86,7 @@
             text-align: center;
             color: #ffffff;
             min-height: 350px;
-            /* Altura mÃ­nima para que la imagen se vea bien */
+            /* Altura mínima para que la imagen se vea bien */
             display: flex;
             flex-direction: column;
             justify-content: flex-end;
@@ -131,18 +130,22 @@
             line-height: 1.6;
             margin-bottom: 25px;
             flex-grow: 0;
-            /* Evita que el pÃ¡rrafo ocupe espacio extra */
+            /* Evita que el párrafo ocupe espacio extra */
         }
 
         .dashboard-card .btn {
             padding: 12px 25px;
             font-size: 15px;
             width: auto;
-            /* El botÃ³n no ocupa todo el ancho */
+            /* El botón no ocupa todo el ancho */
             display: inline-block;
         }
 
-        /* --- IMÃGENES ESPECÃFICAS PARA CADA TARJETA --- */
+        /* --- IMÁGENES ESPECÍFICAS PARA CADA TARJETA --- */
+        #card-ajustes::before {
+            background-image: linear-gradient(to top, rgba(0, 0, 0, 0.9) 20%, rgba(0, 0, 0, 0.2) 80%), url('../../imagenes/Cliente_1.jpg');
+        }
+
         #card-talleres::before {
             background-image: linear-gradient(to top, rgba(0, 0, 0, 0.9) 20%, rgba(0, 0, 0, 0.2) 80%), url('../../imagenes/Buscar_taller1.jpg');
         }
@@ -152,7 +155,11 @@
         }
 
         #card-citas::before {
-            /* Usando una imagen genÃ©rica para citas */
+            /* Usando una imagen genérica para citas */
+            background-image: linear-gradient(to top, rgba(0, 0, 0, 0.9) 20%, rgba(0, 0, 0, 0.2) 80%), url('../../imagenes/citas_1.jpg');
+        }
+
+        #card-historial::before {
             background-image: linear-gradient(to top, rgba(0, 0, 0, 0.9) 20%, rgba(0, 0, 0, 0.2) 80%), url('../../imagenes/citas_1.jpg');
         }
 
@@ -171,6 +178,96 @@
                 grid-template-columns: 1fr;
             }
         }
+
+        /* ----- Estilos para notificaciones ----- */
+        .notification-btn-container {
+            position: relative;
+            cursor: pointer;
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -8px;
+            background: red;
+            color: white;
+            font-size: 0.6em;
+            font-weight: bold;
+            padding: 2px 6px;
+            border-radius: 50%;
+            display: none;
+        }
+
+        .notifications-dropdown {
+            position: absolute;
+            top: 40px;
+            right: 0;
+            width: 300px;
+            background: #2c2c2c;
+            border: 1px solid #444;
+            border-radius: 8px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5);
+            display: none;
+            flex-direction: column;
+            z-index: 1000;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .notifications-dropdown.active {
+            display: flex;
+        }
+
+        .notification-header {
+            padding: 10px;
+            border-bottom: 1px solid #444;
+            font-weight: bold;
+            color: #f39c12;
+            text-align: center;
+        }
+
+        .notification-item {
+            padding: 12px;
+            border-bottom: 1px solid #444;
+            transition: background 0.2s;
+            cursor: pointer;
+        }
+
+        .notification-item:hover {
+            background: #3a3a3a;
+        }
+
+        .notification-item.unread {
+            background: rgba(243, 156, 18, 0.1);
+            border-left: 3px solid #f39c12;
+        }
+
+        .notification-title {
+            font-size: 0.9em;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #fff;
+        }
+
+        .notification-msg {
+            font-size: 0.8em;
+            color: #ccc;
+        }
+
+        .notification-time {
+            font-size: 0.7em;
+            color: #888;
+            margin-top: 5px;
+            display: block;
+            text-align: right;
+        }
+
+        .no-notifications {
+            padding: 20px;
+            text-align: center;
+            color: #888;
+            font-size: 0.9em;
+        }
     </style>
 </head>
 
@@ -178,40 +275,45 @@
 
     <header class="dashboard-header">
         <img src="../../imagenes/Logo_Autoguest.png" alt="Logo de AutoGuest" class="logo">
-        <div class="user-greeting">Â¡Hola, [Nombre del Cliente]!</div>
-        <a href="../../index.html" class="logout-btn">Cerrar Sesión</a>
+        <div class="user-greeting" style="flex-grow: 1; text-align: center;">¡Hola, [Nombre del Cliente]!</div>
+        <div style="display: flex; gap: 20px; align-items: center;">
+            <div class="notification-btn-container" id="btnNotifications">
+                <i class="fas fa-bell" style="color: #f39c12; font-size: 1.8em; transition: transform 0.2s;"></i>
+                <span class="notification-badge" id="notifBadge">0</span>
+
+                <div class="notifications-dropdown" id="notifDropdown">
+                    <div class="notification-header">Mis Notificaciones</div>
+                    <div id="notifList">
+                        <!-- Lista de notificaciones cargadas con JS -->
+                    </div>
+                </div>
+            </div>
+
+            <a href="ajustes.html" title="Ajustes"
+                style="color: #f39c12; font-size: 1.8em; text-decoration: none; transition: transform 0.2s;"><i
+                    class="fas fa-cog"></i></a>
+        </div>
     </header>
 
     <main class="dashboard-container">
         <div class="dashboard-intro-text">
             <h1>Tu Centro de Control</h1>
-            <p>Explora las opciones disponibles para gestionar tu vehÃ­culo y tu movilidad.</p>
+            <p>Explora las opciones disponibles para gestionar tu vehículo y tu movilidad.</p>
         </div>
 
         <div class="dashboard-content">
-            <div class="dashboard-card" onclick="window.location.href='perfil_cliente.html'" style="cursor:pointer;">
-                <div class="card-icon">
-                    <i class="fas fa-user-circle"></i>
-                </div>
-                <div class="card-content">
-                    <h3>Mi Perfil</h3>
-                    <p>Gestiona tu información personal</p>
-                </div>
-            </div>
-
-
             <div class="dashboard-card" id="card-talleres">
                 <div class="card-content">
                     <h3>Buscar Talleres</h3>
-                    <p>Encuentra mecÃ¡nicos de confianza y reserva citas.</p>
+                    <p>Encuentra mecánicos de confianza y reserva citas.</p>
                     <a href="buscar_talleres.html" class="btn">Explorar</a>
                 </div>
             </div>
 
             <div class="dashboard-card" id="card-vehiculos">
                 <div class="card-content">
-                    <h3>Mis VehÃ­culos</h3>
-                    <p>Gestiona la informaciÃ³n de tus vehÃ­culos registrados y consulta su historial.</p>
+                    <h3>Mis Vehículos</h3>
+                    <p>Gestiona la información de tus vehículos registrados y consulta su historial.</p>
                     <a href="gestionar_vehiculos.html" class="btn">Administrar</a>
                 </div>
             </div>
@@ -224,12 +326,20 @@
                 </div>
             </div>
 
+            <div class="dashboard-card" id="card-historial">
+                <div class="card-content">
+                    <h3>Historial de Movimientos</h3>
+                    <p>Revisa todos tus comprobantes de pago, servicios de taller y compras del catálogo.</p>
+                    <a href="historial_cliente.html" class="btn">Ver Historial</a>
+                </div>
+            </div>
+
         </div>
     </main>
 
     <footer>
         <div class="footer-content">
-            <p>Â© 2025 AutoGuest. Todos los derechos reservados.</p>
+            <p>© 2025 AutoGuest. Todos los derechos reservados.</p>
             <div class="social-links">
                 <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
                 <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
@@ -240,46 +350,152 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // 1. Verificar si el usuario ha iniciado sesiÃ³n
+            // 1. Verificar si el usuario ha iniciado sesión
             if (sessionStorage.getItem('isLoggedIn') !== 'true') {
-                // Si no, redirigir a la pÃ¡gina de login. La ruta es relativa a la ubicaciÃ³n actual.
-                alert('Tu sesiÃ³n ha expirado. Por favor, inicia sesiÃ³n de nuevo.');
+                // Si no, redirigir a la página de login. La ruta es relativa a la ubicación actual.
+                alert('Tu sesión ha expirado. Por favor, inicia sesión de nuevo.');
                 window.location.href = '../../login_cliente.html';
-                return; // Detener la ejecuciÃ³n del script
+                return; // Detener la ejecución del script
             }
 
             // 2. Personalizar el saludo de bienvenida
             const userName = sessionStorage.getItem('userName');
             if (userName) {
-                document.querySelector('.dashboard-header .user-greeting').textContent = `Â¡Hola, ${userName}!`;
+                document.querySelector('.dashboard-header .user-greeting').textContent = `¡Hola, ${userName}!`;
             }
 
-            // 3. AÃ±adir funcionalidad al botÃ³n de cerrar sesiÃ³n
+            // 3. Añadir funcionalidad al botón de cerrar sesión
             const logoutBtn = document.querySelector('.logout-btn');
             if (logoutBtn) {
                 logoutBtn.addEventListener('click', async (e) => {
-                    e.preventDefault(); // Prevenir la navegaciÃ³n inmediata
+                    e.preventDefault(); // Prevenir la navegación inmediata
 
                     try {
                         const response = await fetch('/api/registro/logout', { method: 'POST' });
                         if (response.ok) {
-                            // Limpiar los datos de la sesiÃ³n del navegador
+                            // Limpiar los datos de la sesión del navegador
                             sessionStorage.clear();
-                            // Redirigir a la pÃ¡gina de inicio
+                            // Redirigir a la página de inicio
                             window.location.href = '../../index.html';
                         } else {
-                            alert('Error al cerrar sesiÃ³n. IntÃ©ntalo de nuevo.');
+                            alert('Error al cerrar sesión. Inténtalo de nuevo.');
                         }
                     } catch (error) {
-                        console.error('Error de red al cerrar sesiÃ³n:', error);
-                        alert('Error de red al cerrar sesiÃ³n. IntÃ©ntalo de nuevo.');
+                        console.error('Error de red al cerrar sesión:', error);
+                        alert('Error de red al cerrar sesión. Inténtalo de nuevo.');
                     }
                 });
             }
+            // ================== NOTIFICACIONES ================== //
+            const btnNotifications = document.getElementById('btnNotifications');
+            const notifDropdown = document.getElementById('notifDropdown');
+            const notifBadge = document.getElementById('notifBadge');
+            const notifList = document.getElementById('notifList');
+
+            let unreadCount = 0;
+
+            async function fetchNotifications() {
+                try {
+                    const res = await fetch('http://localhost:3000/api/notificaciones', {
+                        credentials: 'include'
+                    });
+
+                    if (res.ok) {
+                        const notifs = await res.json();
+                        renderNotifications(notifs);
+                    }
+                } catch (e) {
+                    console.error('Error cargando notificaciones:', e);
+                }
+            }
+
+            function renderNotifications(notifs) {
+                notifList.innerHTML = '';
+                unreadCount = 0;
+
+                if (notifs.length === 0) {
+                    notifList.innerHTML = '<div class="no-notifications">No tienes notificaciones recientes.</div>';
+                    notifBadge.style.display = 'none';
+                    return;
+                }
+
+                notifs.forEach(n => {
+                    if (!n.leida) unreadCount++;
+
+                    const div = document.createElement('div');
+                    div.className = `notification-item ${!n.leida ? 'unread' : ''}`;
+
+                    const time = new Date(n.fechaCreacion).toLocaleString('es-ES', {
+                        month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+                    });
+
+                    div.innerHTML = `
+                        <div class="notification-title">${n.titulo}</div>
+                        <div class="notification-msg">${n.mensaje}</div>
+                        <span class="notification-time">${time}</span>
+                    `;
+
+                    div.onclick = async (e) => {
+                        e.stopPropagation();
+                        // Marcar como leída si no lo estaba
+                        if (!n.leida) {
+                            try {
+                                const res = await fetch(`http://localhost:3000/api/notificaciones/${n.idNotificacion}/leer`, {
+                                    method: 'PUT',
+                                    credentials: 'include'
+                                });
+                                if (res.ok) {
+                                    n.leida = true;
+                                    div.classList.remove('unread');
+                                    unreadCount--;
+                                    updateBadge();
+                                }
+                            } catch (error) {
+                                console.error('Error marcando leída');
+                            }
+                        }
+                    };
+
+                    notifList.appendChild(div);
+                });
+
+                updateBadge();
+            }
+
+            function updateBadge() {
+                if (unreadCount > 0) {
+                    notifBadge.textContent = unreadCount > 9 ? '9+' : unreadCount;
+                    notifBadge.style.display = 'block';
+                } else {
+                    notifBadge.style.display = 'none';
+                }
+            }
+
+            // Toggle dropdown
+            if (btnNotifications) {
+                btnNotifications.addEventListener('click', (e) => {
+                    e.stopPropagation(); // Evitar que cierre inmediatamente
+                    notifDropdown.classList.toggle('active');
+                });
+            }
+
+            // Cerrar al hacer clic fuera
+            document.addEventListener('click', (e) => {
+                if (notifDropdown && btnNotifications && !notifDropdown.contains(e.target) && !btnNotifications.contains(e.target)) {
+                    notifDropdown.classList.remove('active');
+                }
+            });
+
+            // Cargar inicial y poll cada 15 segundos
+            fetchNotifications();
+            setInterval(fetchNotifications, 15000);
+
         });
     </script>
 
-    <script src="perfil-link.js"></script>`n
+
+
+    <script src="http://localhost:3000/js/global_nav.js"></script>
 </body>
 
 </html>

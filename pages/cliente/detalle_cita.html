@@ -7,8 +7,10 @@
     <title>Detalle de la Cita - AutoGuest</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <link rel="stylesheet" href="../../style.css">
+    <script src="https://sdk.mercadopago.com/js/v2"></script>
+    <script
+        src="https://www.paypal.com/sdk/js?client-id=AV3YWOgsecWq7gVh6mebi4LkOetFi1ULwCt0GWcO3AjuvGe86rFVzvEUj3wqcsfJ24480P5_7xanUTZG&currency=MXN"></script>
     <style>
-        /* Estilos de cabecera y página (sin cambios) */
         .dashboard-header {
             display: flex;
             justify-content: space-between;
@@ -31,7 +33,7 @@
             display: block;
         }
 
-        .back-link {
+        .back-to-appointments {
             color: #c0c0c0;
             text-decoration: none;
             font-size: 15px;
@@ -40,10 +42,14 @@
             align-items: center;
             gap: 8px;
             transition: color 0.3s ease;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 8px 15px;
+            border-radius: 50px;
         }
 
-        .back-link:hover {
+        .back-to-appointments:hover {
             color: #f39c12;
+            background: rgba(243, 156, 18, 0.1);
         }
 
         .header-right {
@@ -52,1230 +58,1431 @@
             gap: 20px;
         }
 
-        .header-right .user-greeting {
-            font-size: 1.1em;
-            color: #c0c0c0;
-        }
-
-        .header-right .logout-btn {
-            background-color: transparent;
-            color: #f39c12;
-            border: 1px solid #f39c12;
-            padding: 10px 20px;
-            font-size: 14px;
-            text-decoration: none;
-            border-radius: 8px;
-        }
-
         .page-container {
-            max-width: 900px;
+            max-width: 1000px;
             margin: 40px auto;
             padding: 0 20px;
         }
 
-        .detail-header {
-            text-align: center;
-            margin-bottom: 40px;
-        }
-
-        .detail-header .icon {
-            font-size: 3.5em;
-            margin-bottom: 15px;
-        }
-
-        .detail-header .icon.taller {
-            color: #f39c12;
-        }
-
-        .detail-header .icon.parking {
-            color: #3498db;
-        }
-
-        .detail-header .icon.history {
-            color: #95a5a6;
-        }
-
-        .detail-header h1 {
-            font-size: 2.5em;
-            color: #ffffff;
-            margin-bottom: 5px;
-        }
-
-        .detail-header p {
-            font-size: 1.2em;
-            color: #c0c0c0;
-        }
-
-        .detail-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 30px;
-        }
-
-        .detail-card {
+        .detalle-container {
             background-color: #2c2c2c;
-            border-radius: 12px;
-            padding: 30px;
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+            position: relative;
         }
 
-        .detail-card h2 {
-            font-size: 1.6em;
-            color: #ffffff;
-            margin-top: 0;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
+        .cita-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
             border-bottom: 1px solid #444;
         }
 
-        .info-list {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-
-        .info-list li {
-            display: flex;
-            justify-content: space-between;
-            padding: 12px 0;
-            border-bottom: 1px solid #3a3a3a;
-        }
-
-        .info-list li:last-child {
-            border-bottom: none;
-        }
-
-        .info-list .label {
-            color: #a0a0a0;
-        }
-
-        .info-list .value {
+        .cita-title h1 {
+            font-size: 2.2em;
             color: #ffffff;
-        }
-
-        .map-container {
-            width: 100%;
-            height: 250px;
-            border-radius: 8px;
-            overflow: hidden;
-        }
-
-        .map-container img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .actions-card .actions-container {
+            margin: 0 0 10px 0;
             display: flex;
-            flex-direction: column;
             align-items: center;
             gap: 15px;
         }
 
-        .actions-card .btn {
-            width: 100%;
-            max-width: 300px;
-        }
-
-        .btn-danger {
-            background-color: #e74c3c;
-            border: 1px solid #e74c3c;
-            color: white;
-        }
-
-        .info-list .value.status-completed {
-            color: #2ecc71;
+        .status-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 50px;
             font-weight: bold;
+            font-size: 0.85em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
-        /* === CHAT - ESTILOS MEJORADOS === */
+        .status-Pendiente {
+            color: #f39c12;
+            background: rgba(243, 156, 18, 0.1);
+            border: 1px solid rgba(243, 156, 18, 0.3);
+        }
+
+        .status-En-Proceso {
+            color: #3498db;
+            background: rgba(52, 152, 219, 0.1);
+            border: 1px solid rgba(52, 152, 219, 0.3);
+        }
+
+        .status-Completado {
+            color: #2ecc71;
+            background: rgba(46, 204, 113, 0.1);
+            border: 1px solid rgba(46, 204, 113, 0.3);
+        }
+
+        .status-Cancelado {
+            color: #e74c3c;
+            background: rgba(231, 76, 60, 0.1);
+            border: 1px solid rgba(231, 76, 60, 0.3);
+        }
+
+        .status-Cotizado {
+            color: #9b59b6;
+            background: rgba(155, 89, 182, 0.1);
+            border: 1px solid rgba(155, 89, 182, 0.3);
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .info-group {
+            background-color: #333;
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        .info-group h3 {
+            color: #f39c12;
+            font-size: 1.2em;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .info-item {
+            margin-bottom: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .info-label {
+            color: #888;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .info-value {
+            color: #fff;
+            font-size: 1.1em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .description-box {
+            background-color: #333;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            border-left: 4px solid #f39c12;
+        }
+
+        .description-box h3 {
+            color: #f39c12;
+            margin-bottom: 15px;
+        }
+
+        .description-text {
+            color: #ddd;
+            line-height: 1.6;
+            white-space: pre-wrap;
+        }
+
+        .actions-container {
+            display: flex;
+            gap: 15px;
+            justify-content: flex-end;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #444;
+        }
+
+        /* ===== ESTILOS DEL MODAL DE COTIZACIÓN ===== */
         .modal-overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(5px);
-            display: none;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: flex;
             justify-content: center;
             align-items: center;
             z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
         }
 
         .modal-overlay.active {
-            display: flex;
+            opacity: 1;
+            visibility: visible;
         }
 
-        .close-btn {
+        .modal-content {
+            background-color: #2c2c2c;
+            width: 90%;
+            max-width: 600px;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            transform: translateY(-20px);
+            transition: transform 0.3s ease;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-overlay.active .modal-content {
+            transform: translateY(0);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #444;
+        }
+
+        .modal-header h2 {
+            color: #f39c12;
+            margin: 0;
+        }
+
+        .close-modal-btn {
             background: none;
             border: none;
-            color: #a0a0a0;
-            font-size: 24px;
+            color: #888;
+            font-size: 1.5em;
             cursor: pointer;
             transition: color 0.2s;
         }
 
-        .close-btn:hover {
-            color: #ffffff;
+        .close-modal-btn:hover {
+            color: #e74c3c;
         }
 
-        /* Modal de Chat */
-        .chat-modal-content {
-            background-color: #1e1e1e;
-            border-radius: 16px;
+        .quote-total {
+            font-size: 2em;
+            color: #2ecc71;
+            text-align: center;
+            margin: 20px 0;
+            font-weight: bold;
+        }
+
+        .quote-description {
+            background: #222;
+            padding: 15px;
+            border-radius: 8px;
+            color: #ddd;
+            margin-bottom: 25px;
+            min-height: 100px;
+            white-space: pre-wrap;
+        }
+
+        .payment-methods {
+            display: none;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        .payment-methods.active {
+            display: flex;
+        }
+
+        #paypal-button-container {
             width: 100%;
-            max-width: 480px;
-            height: 82vh;
-            max-height: 650px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7);
+            margin-top: 15px;
+        }
+
+        .btn-mp {
+            background-color: #009ee3;
+            color: white;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            font-weight: bold;
+            padding: 12px;
+            border-radius: 5px;
+        }
+
+        .btn-mp:hover {
+            background-color: #0080c0;
+        }
+
+
+        /* ===== ESTILOS DEL CHAT ===== */
+        .chat-btn-container {
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        .chat-btn {
+            background-color: #3498db;
+            color: white;
+            padding: 12px 25px;
+            border-radius: 50px;
+            border: none;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+        }
+
+        .chat-btn:hover {
+            background-color: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(52, 152, 219, 0.4);
+        }
+
+        .chat-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .chat-modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .chat-modal-content {
+            background-color: #1a1a1a;
+            width: 90%;
+            max-width: 500px;
+            height: 80vh;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
             display: flex;
             flex-direction: column;
             overflow: hidden;
+            transform: translateY(20px);
+            transition: transform 0.3s ease;
+        }
+
+        .chat-modal-overlay.active .chat-modal-content {
+            transform: translateY(0);
         }
 
         .chat-header {
-            padding: 16px 20px;
-            background: linear-gradient(135deg, #f39c12, #e67e22);
+            background-color: #2c2c2c;
+            padding: 15px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            border-bottom: 2px solid #333;
         }
 
-        .chat-header-info h3 {
+        .chat-header h3 {
             margin: 0;
-            font-size: 1.1em;
-            color: #1a1a1a;
-            font-weight: 700;
-        }
-
-        .chat-header-info p {
-            margin: 2px 0 0;
-            font-size: 0.82em;
-            color: #4a2800;
-        }
-
-        .chat-header .close-btn {
-            color: #1a1a1a;
-            font-size: 22px;
-        }
-
-        .chat-header .close-btn:hover {
-            color: #4a2800;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #3498db;
         }
 
         .chat-messages {
             flex-grow: 1;
-            padding: 16px;
+            padding: 20px;
             overflow-y: auto;
             display: flex;
             flex-direction: column;
-            gap: 10px;
-            background-color: #141414;
+            gap: 15px;
+            background-color: #111;
         }
 
-        .chat-messages::-webkit-scrollbar {
-            width: 4px;
-        }
-
-        .chat-messages::-webkit-scrollbar-track {
-            background: transparent;
-        }
-
-        .chat-messages::-webkit-scrollbar-thumb {
-            background: #444;
-            border-radius: 2px;
-        }
-
-        .chat-date-separator {
-            text-align: center;
-            font-size: 0.75em;
-            color: #666;
-            margin: 6px 0;
+        .chat-message {
+            max-width: 80%;
+            padding: 10px 15px;
+            border-radius: 12px;
             position: relative;
+            word-wrap: break-word;
         }
 
-        .chat-date-separator::before,
-        .chat-date-separator::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            width: 30%;
-            height: 1px;
-            background: #333;
+        .chat-message.cliente {
+            align-self: flex-end;
+            background-color: #3498db;
+            color: white;
+            border-bottom-right-radius: 2px;
         }
 
-        .chat-date-separator::before {
-            left: 0;
-        }
-
-        .chat-date-separator::after {
-            right: 0;
-        }
-
-        .message-wrapper {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .message-wrapper.sent {
-            align-items: flex-end;
-        }
-
-        .message-wrapper.received {
-            align-items: flex-start;
-        }
-
-        .message-sender-name {
-            font-size: 0.72em;
-            color: #888;
-            margin-bottom: 3px;
-            padding: 0 4px;
-        }
-
-        .message {
-            max-width: 78%;
-            padding: 10px 14px;
-            border-radius: 18px;
-            line-height: 1.45;
-            font-size: 0.92em;
-        }
-
-        .message.received {
+        .chat-message.mecanico {
+            align-self: flex-start;
             background-color: #2c2c2c;
             color: #e0e0e0;
-            border-bottom-left-radius: 4px;
+            border-bottom-left-radius: 2px;
+            border: 1px solid #333;
         }
 
-        .message.sent {
-            background: linear-gradient(135deg, #f39c12, #e67e22);
-            color: #1a1a1a;
-            border-bottom-right-radius: 4px;
-            font-weight: 500;
+        .chat-message-image {
+            max-width: 100%;
+            border-radius: 8px;
+            margin-bottom: 5px;
+            cursor: pointer;
+            transition: transform 0.2s ease;
         }
 
-        .message img.chat-img {
-            max-width: 220px;
-            max-height: 220px;
-            border-radius: 10px;
+        .chat-message-image:hover {
+            transform: scale(1.02);
+        }
+
+        .chat-time {
+            font-size: 0.7em;
+            opacity: 0.7;
             display: block;
-            cursor: pointer;
-            object-fit: cover;
+            text-align: right;
+            margin-top: 5px;
         }
 
-        .message-time {
-            font-size: 0.68em;
-            color: #666;
-            margin-top: 3px;
-            padding: 0 4px;
-        }
-
-        .chat-loading {
-            text-align: center;
-            color: #666;
-            font-size: 0.9em;
-            padding: 20px;
-        }
-
-        .chat-empty {
-            text-align: center;
-            color: #555;
-            padding: 30px 20px;
-        }
-
-        .chat-empty i {
-            font-size: 2.5em;
-            display: block;
-            margin-bottom: 10px;
-        }
-
-        /* Input Area */
-        .chat-input-area {
-            padding: 12px 14px;
-            border-top: 1px solid #2a2a2a;
-            background-color: #1e1e1e;
-        }
-
-        .chat-input-row {
-            display: flex;
-            gap: 8px;
-            align-items: flex-end;
-        }
-
-        .chat-input {
-            flex-grow: 1;
-            padding: 10px 14px;
-            background-color: #2a2a2a;
-            border: 1px solid #3a3a3a;
-            border-radius: 22px;
-            color: #f0f0f0;
-            font-size: 0.9em;
-            resize: none;
-            max-height: 100px;
-            outline: none;
-            transition: border-color 0.2s;
-            font-family: inherit;
-        }
-
-        .chat-input:focus {
-            border-color: #f39c12;
-        }
-
-        .chat-icon-btn {
-            background: none;
-            border: none;
-            color: #888;
-            font-size: 1.2em;
-            cursor: pointer;
-            padding: 8px;
-            border-radius: 50%;
-            transition: color 0.2s, background 0.2s;
-            flex-shrink: 0;
-        }
-
-        .chat-icon-btn:hover {
-            color: #f39c12;
-            background: #2a2a2a;
-        }
-
-        .send-btn {
-            background: linear-gradient(135deg, #f39c12, #e67e22);
-            border: none;
-            color: #1a1a1a;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            cursor: pointer;
-            font-size: 1em;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-            transition: transform 0.15s, box-shadow 0.15s;
-        }
-
-        .send-btn:hover {
-            transform: scale(1.1);
-            box-shadow: 0 4px 12px rgba(243, 156, 18, 0.4);
-        }
-
-        .send-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        /* Imagen preview antes de enviar */
-        .img-preview-area {
+        /* Área de previsualización de imagen (NUEVO) */
+        .chat-image-preview-container {
             display: none;
+            background-color: #222;
+            padding: 10px 20px;
+            border-top: 1px solid #333;
             align-items: center;
             gap: 10px;
-            padding: 8px 10px;
-            background: #2a2a2a;
-            border-radius: 10px;
-            margin-bottom: 8px;
         }
 
-        .img-preview-area.visible {
+        .chat-image-preview-container.active {
             display: flex;
         }
 
-        .img-preview-area img {
-            width: 60px;
-            height: 60px;
-            object-fit: cover;
-            border-radius: 8px;
+        .chat-image-preview {
+            max-height: 80px;
+            max-width: 80px;
+            border-radius: 6px;
+            object-fit: contain;
+            background-color: #000;
         }
 
-        .img-preview-info {
-            flex: 1;
-            overflow: hidden;
-        }
-
-        .img-preview-info p {
-            margin: 0;
+        .chat-image-preview-info {
+            flex-grow: 1;
             font-size: 0.8em;
-            color: #ccc;
+            color: #aaa;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
 
-        .img-preview-info span {
-            font-size: 0.72em;
-            color: #888;
-        }
-
-        .remove-img-btn {
+        .chat-image-remove-btn {
             background: none;
             border: none;
             color: #e74c3c;
-            font-size: 1.1em;
             cursor: pointer;
-            padding: 4px;
+            font-size: 1.2em;
+            padding: 5px;
+            border-radius: 50%;
+            transition: background 0.2s;
         }
 
-        /* Lightbox para ver imágenes en grande */
-        .img-lightbox {
+        .chat-image-remove-btn:hover {
+            background-color: rgba(231, 76, 60, 0.1);
+        }
+
+        .chat-input-area {
+            background-color: #2c2c2c;
+            padding: 15px;
+            display: flex;
+            gap: 10px;
+            align-items: flex-end;
+        }
+
+        .chat-input-wrapper {
+            flex-grow: 1;
+            position: relative;
+        }
+
+        .chat-input {
+            width: 100%;
+            padding: 12px 40px 12px 15px;
+            /* Espacio para el botón de adjuntar */
+            border-radius: 20px;
+            border: 1px solid #444;
+            background-color: #333;
+            color: white;
+            resize: none;
+            min-height: 45px;
+            max-height: 120px;
+            font-family: inherit;
+        }
+
+        .chat-input:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+
+        .chat-attach-btn {
+            position: absolute;
+            right: 10px;
+            bottom: 10px;
+            background: none;
+            border: none;
+            color: #aaa;
+            cursor: pointer;
+            font-size: 1.2em;
+            transition: color 0.2s;
+            padding: 5px;
+        }
+
+        .chat-attach-btn:hover {
+            color: #3498db;
+        }
+
+        /* Ocultar el input file real */
+        #chat-file-input {
             display: none;
+        }
+
+        .chat-send-btn {
+            background-color: #f39c12;
+            color: white;
+            border: none;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: background 0.3s;
+            flex-shrink: 0;
+        }
+
+        .chat-send-btn:hover {
+            background-color: #e67e22;
+        }
+
+        /* Estilos para el Lightbox de imágenes */
+        .lightbox-overlay {
             position: fixed;
-            z-index: 9999;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.92);
+            background-color: rgba(0, 0, 0, 0.9);
+            display: flex;
             justify-content: center;
             align-items: center;
-            cursor: zoom-out;
+            z-index: 3000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
         }
 
-        .img-lightbox.active {
-            display: flex;
+        .lightbox-overlay.active {
+            opacity: 1;
+            visibility: visible;
         }
 
-        .img-lightbox img {
-            max-width: 90vw;
+        .lightbox-image {
+            max-width: 90%;
             max-height: 90vh;
-            border-radius: 8px;
-            box-shadow: 0 0 40px rgba(0, 0, 0, 0.8);
+            border-radius: 5px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
         }
 
-        /* Se elimina el modal de Ticket ya que solo es para parking */
+        .lightbox-close {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            color: white;
+            font-size: 2em;
+            cursor: pointer;
+            background: none;
+            border: none;
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+            transition: color 0.2s;
+        }
+
+        .lightbox-close:hover {
+            color: #f39c12;
+        }
     </style>
 </head>
 
 <body>
-
+    <script>
+        const API_URL = 'http://localhost:3000';
+    </script>
     <header class="dashboard-header">
         <div class="header-left">
             <a href="dashboard_cliente.html"><img src="../../imagenes/Logo_Autoguest.png" alt="Logo de AutoGuest"
                     class="logo"></a>
-            <a href="mis_citas.html" class="back-link"><i class="fas fa-arrow-left"></i><span>Volver a Mis
-                    Citas</span></a>
+            <a href="mis_citas.html" class="back-to-appointments">
+                <i class="fas fa-arrow-left"></i>
+            </a>
         </div>
         <div class="header-right">
-            <div class="user-greeting">¡Hola, [Nombre del Cliente]!</div>
-            <a href="../../index.html" class="logout-btn">Cerrar Sesión</a>
+            <a href="dashboard_cliente.html" class="btn btn-secondary">
+                <i class="fas fa-home"></i>
+            </a>
         </div>
     </header>
 
     <main class="page-container">
-        <div class="detail-header" id="detailHeader"></div>
-        <div class="detail-grid">
-            <div class="detail-card">
-                <h2 id="serviceCardTitle"></h2>
-                <ul class="info-list" id="serviceInfoList"></ul>
+        <div class="detalle-container" id="loading-container">
+            <div style="text-align: center; color: #888; padding: 40px;">
+                <i class="fas fa-spinner fa-spin fa-3x" style="margin-bottom: 15px;"></i>
+                <h2>Cargando detalles de la cita...</h2>
             </div>
-            <div class="detail-card" id="locationCard">
-                <h2>Ubicación</h2>
-                <div class="map-container">
-                    <img src="../../imagenes/ubi_acostado.jpg" alt="Mapa de la ubicación del servicio">
+        </div>
+
+        <div class="detalle-container" id="content-container" style="display: none;">
+            <div class="cita-header">
+                <div class="cita-title">
+                    <h1><i class="fas fa-car"></i> <span id="vehiculo-nombre"></span></h1>
+                    <span id="estado-badge" class="status-badge"></span>
+                </div>
+                <!-- Aquí se agregará el botón para descargar el ticket (si está completado) -->
+                <div id="ticket-action" style="display: none;">
+                    <a href="#" id="btnDownloadTicket" class="btn btn-primary">
+                        <i class="fas fa-download"></i> Descargar Comprobante
+                    </a>
                 </div>
             </div>
-            <div class="detail-card" id="actionsCard">
-                <h2>Acciones</h2>
-                <div class="actions-container" id="actionsContainer"></div>
+
+            <div class="info-grid">
+                <div class="info-group">
+                    <h3><i class="fas fa-info-circle"></i> Información General</h3>
+                    <div class="info-item">
+                        <span class="info-label">Fecha y Hora</span>
+                        <span class="info-value" id="cita-fecha"><i class="fas fa-calendar-alt"></i> -</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Placas del Vehículo</span>
+                        <span class="info-value" id="cita-placas">-</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">ID de Cita</span>
+                        <span class="info-value" style="font-family: monospace; color: #aaa;" id="cita-id">-</span>
+                    </div>
+                </div>
+
+                <div class="info-group">
+                    <h3><i class="fas fa-store"></i> Taller Asignado</h3>
+                    <div class="info-item">
+                        <span class="info-label">Nombre del Taller</span>
+                        <span class="info-value" id="taller-nombre">-</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Dirección</span>
+                        <span class="info-value" id="taller-direccion"><i class="fas fa-map-marker-alt"></i> -</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Teléfono de Contacto</span>
+                        <span class="info-value" id="taller-telefono"><i class="fas fa-phone"></i> -</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="description-box">
+                <h3><i class="fas fa-clipboard-list"></i> Motivo de la Cita / Falla Reportada</h3>
+                <div class="description-text" id="cita-motivo"></div>
+            </div>
+
+            <!-- Botón de Chat (Visible en todos los estados donde haya taller) -->
+            <div class="chat-btn-container" id="chat-access-container">
+                <button type="button" class="chat-btn" id="openChatBtn">
+                    <i class="fas fa-comments"></i>
+                    Chat con el Taller <span id="chatBadge" class="badge"
+                        style="display:none; background:red; color:white; border-radius:50%; padding:2px 6px; font-size:12px; margin-left:5px;">0</span>
+                </button>
+            </div>
+
+            <div class="actions-container" id="actions-container">
+                <!-- Los botones dinámicos aparecerán aquí según el estado -->
             </div>
         </div>
     </main>
 
-    <!-- CHAT MODAL -->
-    <div class="modal-overlay" id="chatModal">
-        <div class="chat-modal-content">
-            <!-- Header -->
-            <div class="chat-header">
-                <div class="chat-header-info">
-                    <h3 id="chat-partner-name"></h3>
-                    <p id="chat-partner-contact"></p>
-                </div>
-                <button class="close-btn" id="closeChatBtn" title="Cerrar chat">×</button>
+    <!-- MODAL DE COTIZACIÓN -->
+    <div class="modal-overlay" id="quoteModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-file-invoice-dollar"></i> Cotización del Servicio</h2>
+                <button class="close-modal-btn" id="closeQuoteModal"><i class="fas fa-times"></i></button>
             </div>
 
-            <!-- Mensajes -->
-            <div class="chat-messages" id="chatMessages">
-                <div class="chat-loading">
-                    <i class="fas fa-spinner fa-spin"></i><br>Cargando historial...
-                </div>
+            <p>El taller ha evaluado tu vehículo y ha generado la siguiente cotización para la reparación:</p>
+
+            <div class="quote-description" id="quoteDescription">
+                <!-- Se llenará mediante JS -->
             </div>
 
-            <!-- Input Area -->
-            <div class="chat-input-area">
-                <!-- Preview de imagen seleccionada -->
-                <div class="img-preview-area" id="imgPreviewArea">
-                    <img id="imgPreviewThumb" src="" alt="Preview">
-                    <div class="img-preview-info">
-                        <p id="imgPreviewName">imagen.jpg</p>
-                        <span id="imgPreviewSize"></span>
-                    </div>
-                    <button class="remove-img-btn" id="removeImgBtn" title="Quitar imagen">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
+            <div style="text-align: right; margin-top: 10px; color: #888;">
+                Fecha: <span id="quoteDate"></span>
+            </div>
 
-                <!-- Fila de input -->
-                <div class="chat-input-row">
-                    <!-- Botón adjuntar imagen -->
-                    <button type="button" class="chat-icon-btn" id="attachImgBtn" title="Enviar imagen">
-                        <i class="fas fa-image"></i>
-                    </button>
-                    <input type="file" id="imgFileInput" accept="image/*" style="display:none">
+            <div class="quote-total" id="quoteTotal">
+                $0.00 MXN
+            </div>
 
-                    <!-- Textarea de texto -->
-                    <textarea id="chatInput" class="chat-input" placeholder="Escribe un mensaje..." rows="1"
-                        autocomplete="off"></textarea>
+            <!-- Botones de Acción Iniciales -->
+            <div class="actions-container" id="quoteInitialActions">
+                <button class="btn btn-danger" id="btnRejectQuote">Rechazar Cotización</button>
+                <button class="btn btn-primary" id="btnAcceptQuote">Aceptar e Iniciar Servicio</button>
+            </div>
 
-                    <!-- Botón enviar -->
-                    <button type="button" class="send-btn" id="sendChatBtn" title="Enviar">
-                        <i class="fas fa-paper-plane"></i>
-                    </button>
+            <!-- Métodos de Pago (Se muestran al aceptar) -->
+            <div class="payment-methods" id="paymentMethodsSection">
+                <h3 style="border-bottom: 1px solid #444; padding-bottom: 10px; margin-bottom: 15px;">Selecciona tu
+                    método de pago</h3>
+
+                <!-- PayPal -->
+                <div id="paypal-button-container"></div>
+
+                <!-- Mercado Pago -->
+                <button class="btn-mp" id="btnMercadoPago">
+                    <i class="fas fa-handshake"></i> Pagar con Mercado Pago
+                </button>
+
+                <!-- Botón Cancelar Pago -->
+                <div style="text-align: center; margin-top: 20px;">
+                    <button class="btn btn-secondary" id="btnCancelPayment">Volver a opciones</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Lightbox para imágenes -->
-    <div class="img-lightbox" id="imgLightbox">
-        <img id="lightboxImg" src="" alt="Imagen ampliada">
+    <!-- MODAL DE CHAT -->
+    <div class="chat-modal-overlay" id="chatModal">
+        <div class="chat-modal-content">
+            <div class="chat-header">
+                <h3 id="chatTallerNombre"><i class="fas fa-tools"></i> Taller Automotriz</h3>
+                <button class="close-modal-btn" id="closeChatBtn" style="color:white;"><i
+                        class="fas fa-times"></i></button>
+            </div>
+            <div class="chat-messages" id="chatMessages">
+                <div style="text-align:center; color:#888; font-style:italic;">Cargando mensajes...</div>
+            </div>
+
+            <!-- Previsualización de Imagen -->
+            <div class="chat-image-preview-container" id="chatImagePreviewContainer">
+                <img id="chatImagePreview" class="chat-image-preview" src="" alt="Vista previa">
+                <div class="chat-image-preview-info" id="chatImagePreviewName">nombre_archivo.jpg</div>
+                <button class="chat-image-remove-btn" id="chatRemoveImageBtn" title="Quitar imagen">
+                    <i class="fas fa-times-circle"></i>
+                </button>
+            </div>
+
+            <div class="chat-input-area">
+                <div class="chat-input-wrapper">
+                    <!-- Textarea auto-ajustable -->
+                    <textarea class="chat-input" id="chatInputMessage" placeholder="Escribe tu mensaje..."
+                        rows="1"></textarea>
+
+                    <!-- Input file oculto -->
+                    <input type="file" id="chat-file-input" accept="image/png, image/jpeg, image/jpg, image/webp">
+
+                    <!-- Botón para adjuntar imagen -->
+                    <button class="chat-attach-btn" id="chatAttachBtn" title="Adjuntar imagen">
+                        <i class="fas fa-paperclip"></i>
+                    </button>
+                </div>
+                <button class="chat-send-btn" id="chatSendBtn" title="Enviar mensaje">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
     </div>
 
-    <script src="https://sdk.mercadopago.com/js/v2"></script>
+    <!-- LIGHTBOX PARA IMÁGENES -->
+    <div class="lightbox-overlay" id="lightboxOverlay">
+        <button class="lightbox-close" id="lightboxClose">&times;</button>
+        <img id="lightboxImage" class="lightbox-image" src="" alt="Imagen ampliada">
+    </div>
+
+
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
-            // --- INICIO: Guardián de Autenticación y Personalización ---
+            // Verificar autenticación
             if (sessionStorage.getItem('isLoggedIn') !== 'true') {
-                alert('Tu sesión ha expirado. Por favor, inicia sesión de nuevo.');
                 window.location.href = '../../login_cliente.html';
                 return;
             }
 
-            const userName = sessionStorage.getItem('userName');
-            if (userName) {
-                document.querySelector('.header-right .user-greeting').textContent = `¡Hola, ${userName}!`;
-            }
-
-            const logoutBtn = document.querySelector('.logout-btn');
-            if (logoutBtn) {
-                logoutBtn.addEventListener('click', async (e) => {
-                    e.preventDefault();
-                    try {
-                        const response = await fetch('/api/registro/logout', { method: 'POST' });
-                        if (response.ok) {
-                            sessionStorage.clear();
-                            window.location.href = '../../index.html';
-                        } else {
-                            alert('Error al cerrar sesión.');
-                        }
-                    } catch (error) {
-                        alert('Error de red al cerrar sesión.');
-                    }
-                });
-            }
-            // --- FIN: Guardián de Autenticación ---
-
-            const params = new URLSearchParams(window.location.search);
-            const idCita = params.get('id');
+            // Obtener ID de la URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const idCita = urlParams.get('id');
 
             if (!idCita) {
-                alert('No se especificó ninguna cita.');
+                alert('ID de cita no proporcionado.');
                 window.location.href = 'mis_citas.html';
                 return;
             }
 
-            const detailHeader = document.getElementById('detailHeader'), serviceCardTitle = document.getElementById('serviceCardTitle');
-            const serviceInfoList = document.getElementById('serviceInfoList'), locationCard = document.getElementById('locationCard');
-            const actionsContainer = document.getElementById('actionsContainer');
+            const loadingContainer = document.getElementById('loading-container');
+            const contentContainer = document.getElementById('content-container');
+            let isQuoteAccepted = false; // Bandera para saber si ya dimos clic en Aceptar
+            let citaDataActual = null; // Guardar datos de la cita globalmente
 
-            // (Variables del chat se declaran en la sección de lógica de chat más abajo)
-
-            try {
-                const response = await fetch(`/api/citas/${idCita}`);
-                if (!response.ok) throw new Error('Error al cargar la cita');
-
-                const cita = await response.json();
-
-                const fecha = new Date(cita.fechaHora).toLocaleString('es-ES', { dateStyle: 'long', timeStyle: 'short' });
-                const isCompleted = cita.estado === 'Completado';
-
-                // Configurar Header
-                detailHeader.innerHTML = `
-                    <i class="icon fas fa-wrench taller"></i>
-                    <h1>Cita en ${cita.tallerNombre}</h1>
-                    <p>${cita.tallerDireccion || 'Dirección no disponible'}</p>
-                `;
-
-                // Configurar Tarjeta de Servicio
-                serviceCardTitle.textContent = 'Detalles del Servicio';
-                serviceInfoList.innerHTML = `
-                    <li><span class="label">Estado</span><span class="value" style="color: ${isCompleted ? '#2ecc71' : '#f39c12'}">${cita.estado}</span></li>
-                    <li><span class="label">Fecha y Hora</span><span class="value">${fecha}</span></li>
-                    <li><span class="label">Vehículo</span><span class="value">${cita.vehiculoMarca} ${cita.vehiculoModelo} (${cita.vehiculoPlaca})</span></li>
-                    <li><span class="label">Mecánico</span><span class="value">${cita.mecanicoNombre || 'Pendiente de asignación'}</span></li>
-                `;
-
-                // Configurar Acciones
-                let actionsHtml = '';
-                if (cita.estado === 'Pendiente' || cita.estado === 'Pendiente de Cotización') {
-                    actionsHtml += `<button id="cancelarCitaTaller" class="btn btn-danger">Cancelar Cita</button>`;
-                    actionsHtml += `<button id="contactarTaller" class="btn btn-secondary">Contactar Taller</button>`;
-                } else if (cita.estado === 'Cotizado') {
-                    // Mostrar detalles de la cotización
-                    try {
-                        const quoteRes = await fetch(`/api/citas/${idCita}/cotizacion`);
-                        if (quoteRes.ok) {
-                            const quote = await quoteRes.json();
-
-                            // Insertar tarjeta de cotización antes de las acciones
-                            const detailGrid = document.querySelector('.detail-grid');
-                            const quoteCard = document.createElement('div');
-                            quoteCard.className = 'detail-card';
-                            quoteCard.innerHTML = `
-                                <h2><i class="fas fa-file-invoice-dollar" style="color: #f39c12;"></i> Cotización Recibida</h2>
-                                <p style="color: #ccc; margin-bottom: 15px;">${quote.diagnostico || 'Propuesta de trabajo'}</p>
-                                <ul class="info-list">
-                                    ${quote.servicios.map(s => `
-                                        <li>
-                                            <span class="value">${s.nombre}</span>
-                                            <span class="value">$${s.precio.toFixed(2)}</span>
-                                        </li>
-                                    `).join('')}
-                                    <li style="border-top: 2px dashed #444; margin-top: 10px; padding-top: 15px;">
-                                        <span class="label" style="font-size: 1.2em; color: #f39c12;">TOTAL ESTIMADO</span>
-                                        <span class="value" style="font-size: 1.2em; font-weight: bold; color: #f39c12;">$${quote.totalAprobado.toFixed(2)}</span>
-                                    </li>
-                                </ul>
-                            `;
-                            detailGrid.insertBefore(quoteCard, document.getElementById('actionsCard'));
-                        }
-                    } catch (e) { console.error("Error cargando cotización", e); }
-
-                    actionsHtml += `<button id="aprobarCotizacion" class="btn" style="background-color: #2ecc71;">Aprobar Cotización</button>`;
-                    actionsHtml += `<button id="rechazarCotizacion" class="btn btn-secondary" style="background-color: #e74c3c; border-color: #c0392b;">Rechazar Cotización</button>`;
-
-                } else if (cita.estado === 'En Proceso') {
-                    actionsHtml += `<div style="text-align: center; padding: 15px; background: #34495e; border-radius: 8px; width: 100%;">
-                        <i class="fas fa-tools fa-spin" style="font-size: 2em; color: #3498db;"></i>
-                        <p style="margin: 10px 0 0; color: white;">Tu vehículo está siendo reparado.</p>
-                     </div>`;
-                    actionsHtml += `<button id="contactarTaller" class="btn btn-secondary" style="margin-top: 10px;">Contactar Taller</button>`;
-
-                } else if (isCompleted) {
-                    actionsHtml += `<button id="pagarCita" class="btn">Pagar Servicio</button>`;
-                    actionsHtml += `<button id="descargarFactura" class="btn btn-secondary">Descargar Nota</button>`;
-                }
-
-                // Contenedores de pago
-                actionsHtml += `
-                    <div id="paypal-button-container" style="width: 100%; max-width: 300px; margin-top: 15px; display: none;"></div>
-                    <div id="mercadopago-button-container" style="width: 100%; max-width: 300px; margin-top: 15px;"></div>
-                    <div id="payment-message" style="display: none; margin-top: 15px; padding: 15px; border-radius: 8px; width: 100%; max-width: 300px; text-align: center; color: white;"></div>
-                `;
-
-                actionsContainer.innerHTML = actionsHtml;
-
-                // Listeners de Acciones
-                actionsContainer.addEventListener('click', async (e) => {
-                    const targetId = e.target.id;
-                    if (!targetId) return;
-                    switch (targetId) {
-                        case 'rechazarCotizacion':
-                            if (confirm("¿Estás seguro de que deseas rechazar la cotización? Esto cancelará la cita.")) {
-                                try {
-                                    const res = await fetch(`/api/citas/${idCita}/rechazar-cotizacion`, { method: 'PUT' });
-                                    const data = await res.json();
-                                    if (data.success) {
-                                        alert(data.message);
-                                        window.location.reload();
-                                    } else {
-                                        alert(data.error);
-                                    }
-                                } catch (err) { alert("Error de conexión"); }
-                            }
-                            break;
-                        case 'aprobarCotizacion':
-                            if (confirm("¿Aprobar presupuesto e iniciar reparación?")) {
-                                try {
-                                    const res = await fetch(`/api/citas/${idCita}/aprobar-cotizacion`, { method: 'PUT' });
-                                    const data = await res.json();
-                                    if (data.success) {
-                                        alert("¡Cotización aprobada! El mecánico ha sido notificado.");
-                                        location.reload();
-                                    } else {
-                                        alert(data.error);
-                                    }
-                                } catch (err) { alert("Error de conexión"); }
-                            }
-                            break;
-                        case 'pagarCita':
-                            document.getElementById('paypal-button-container').style.display = 'block';
-                            e.target.style.display = 'none';
-                            break;
-                        case 'contactarTaller':
-                            openChat(cita.tallerNombre, idCita);
-                            break;
-                        case 'cancelarCitaTaller':
-                            if (confirm('¿Estás seguro de que quieres cancelar esta cita? Esta acción no se puede deshacer.')) {
-                                cancelarCita(idCita);
-                            }
-                            break;
-                        case 'reservarDeNuevo':
-                            window.location.href = 'buscar_talleres.html';
-                            break;
-                    }
-                });
-
-            } catch (error) {
-                console.error(error);
-                detailHeader.innerHTML = '<h1>Error al cargar la cita</h1>';
-                serviceInfoList.innerHTML = '<li>No se pudo encontrar la información.</li>';
-            }
-
-            // === LÓGICA DEL CHAT (REAL CON API) ===
-            let chatPollingInterval = null;
-            let selectedImageData = null; // { base64, nombre, size }
-
-            const chatModal = document.getElementById('chatModal');
+            // Elementos del Chat
+            const modalChat = document.getElementById('chatModal');
+            const openChatBtn = document.getElementById('openChatBtn');
             const closeChatBtn = document.getElementById('closeChatBtn');
             const chatMessages = document.getElementById('chatMessages');
-            const chatInput = document.getElementById('chatInput');
-            const sendChatBtn = document.getElementById('sendChatBtn');
-            const attachImgBtn = document.getElementById('attachImgBtn');
-            const imgFileInput = document.getElementById('imgFileInput');
-            const imgPreviewArea = document.getElementById('imgPreviewArea');
-            const imgPreviewThumb = document.getElementById('imgPreviewThumb');
-            const imgPreviewName = document.getElementById('imgPreviewName');
-            const imgPreviewSize = document.getElementById('imgPreviewSize');
-            const removeImgBtn = document.getElementById('removeImgBtn');
-            const imgLightbox = document.getElementById('imgLightbox');
-            const lightboxImg = document.getElementById('lightboxImg');
+            const chatInput = document.getElementById('chatInputMessage');
+            const chatSendBtn = document.getElementById('chatSendBtn');
+            const chatTallerNombre = document.getElementById('chatTallerNombre');
+            const chatBadge = document.getElementById('chatBadge');
 
-            // ----- Abrir/Cerrar Chat -----
-            function openChat(tallerName, idCitaChat) {
-                document.getElementById('chat-partner-name').textContent = tallerName;
-                document.getElementById('chat-partner-contact').textContent = 'Chat directo con el mecánico';
-                chatModal.classList.add('active');
-                loadChatHistory(idCitaChat);
-                // Polling cada 5 segundos para nuevos mensajes
-                if (chatPollingInterval) clearInterval(chatPollingInterval);
-                chatPollingInterval = setInterval(() => loadChatHistory(idCitaChat, true), 5000);
-            }
+            // Nuevos elementos para imágenes en el chat
+            const fileInput = document.getElementById('chat-file-input');
+            const attachBtn = document.getElementById('chatAttachBtn');
+            const imagePreviewContainer = document.getElementById('chatImagePreviewContainer');
+            const imagePreviewElement = document.getElementById('chatImagePreview');
+            const imagePreviewName = document.getElementById('chatImagePreviewName');
+            const removeImageBtn = document.getElementById('chatRemoveImageBtn');
 
-            function closeChat() {
-                chatModal.classList.remove('active');
-                if (chatPollingInterval) {
-                    clearInterval(chatPollingInterval);
-                    chatPollingInterval = null;
+            // Lightbox
+            const lightboxOverlay = document.getElementById('lightboxOverlay');
+            const lightboxImage = document.getElementById('lightboxImage');
+            const lightboxClose = document.getElementById('lightboxClose');
+
+            let chatInterval;
+            let currentImageBase64 = null; // Variable para almacenar la imagen actual seleccionada
+
+            // Función para obtener headers con autenticación
+            const getAuthHeaders = (contentType = 'application/json') => {
+                const headers = {
+                    'Authorization': 'Bearer ' + localStorage.getItem('token')
+                };
+                if (contentType) {
+                    headers['Content-Type'] = contentType;
                 }
-            }
+                return headers;
+            };
 
-            closeChatBtn.addEventListener('click', closeChat);
-            chatModal.addEventListener('click', (e) => { if (e.target === chatModal) closeChat(); });
-
-            // ----- Cargar historial de mensajes -----
-            async function loadChatHistory(idCitaParam, silent = false) {
-                if (!silent) {
-                    chatMessages.innerHTML = '<div class="chat-loading"><i class="fas fa-spinner fa-spin"></i><br>Cargando historial...</div>';
-                }
-                try {
-                    const res = await fetch(`/api/chat/${idCitaParam}`);
-                    if (!res.ok) {
-                        if (!silent) chatMessages.innerHTML = '<div class="chat-empty"><i class="fas fa-exclamation-circle"></i>No se pudo cargar el chat.</div>';
-                        return;
-                    }
-                    const mensajes = await res.json();
-                    renderMessages(mensajes);
-                } catch (e) {
-                    console.error('[Chat] Error al cargar:', e);
-                    if (!silent) chatMessages.innerHTML = '<div class="chat-empty"><i class="fas fa-wifi"></i>Error de conexión.</div>';
-                }
-            }
-
-            // ----- Renderizar mensajes -----
-            function renderMessages(mensajes) {
-                const myId = sessionStorage.getItem('userId');
-                const wasAtBottom = chatMessages.scrollHeight - chatMessages.scrollTop <= chatMessages.clientHeight + 60;
-
-                if (mensajes.length === 0) {
-                    chatMessages.innerHTML = '<div class="chat-empty"><i class="fas fa-comments"></i><br>No hay mensajes aún.<br><small>¡Sé el primero en escribir!</small></div>';
-                    return;
-                }
-
-                let html = '';
-                let lastDate = '';
-
-                mensajes.forEach(msg => {
-                    const isMio = msg.remitenteId === myId;
-                    const wrapperClass = isMio ? 'sent' : 'received';
-                    const msgClass = isMio ? 'sent' : 'received';
-
-                    // Separador de fecha
-                    const fechaObj = new Date(msg.fechaEnvio);
-                    const fechaStr = fechaObj.toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long' });
-                    if (fechaStr !== lastDate) {
-                        html += `<div class="chat-date-separator">${fechaStr}</div>`;
-                        lastDate = fechaStr;
-                    }
-
-                    // Hora
-                    const hora = fechaObj.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' });
-
-                    // Contenido
-                    let contenidoHtml;
-                    if (msg.tipoContenido === 'imagen') {
-                        const altText = msg.nombreArchivo || 'Imagen';
-                        contenidoHtml = `<img class="chat-img" src="${msg.contenido}" alt="${altText}" onclick="abrirLightbox('${msg.contenido}')">`;
-                    } else {
-                        contenidoHtml = escapeHtml(msg.contenido);
-                    }
-
-                    html += `
-                        <div class="message-wrapper ${wrapperClass}">
-                            ${!isMio ? `<span class="message-sender-name">${escapeHtml(msg.remitenteNombre)}</span>` : ''}
-                            <div class="message ${msgClass}">${contenidoHtml}</div>
-                            <span class="message-time">${hora}</span>
-                        </div>
-                    `;
+            // Obtener detalles de la cita
+            try {
+                const response = await fetch(API_URL + `/api/citas/${idCita}`, {
+                    headers: getAuthHeaders(),
+                    credentials: 'include'
                 });
 
-                chatMessages.innerHTML = html;
-                if (wasAtBottom || !chatPollingInterval) {
-                    chatMessages.scrollTop = chatMessages.scrollHeight;
+                if (response.status === 401 || response.status === 403) {
+                    alert('No autorizado o sesión expirada.');
+                    window.location.href = '../../login_cliente.html';
+                    return;
+                }
+                if (!response.ok) throw new Error('Cita no encontrada');
+
+                const cita = await response.json();
+                citaDataActual = cita;
+
+                // Llenar vista
+                document.getElementById('vehiculo-nombre').textContent = cita.vehiculoMarca;
+                document.getElementById('cita-placas').textContent = cita.vehiculoPlaca;
+                document.getElementById('cita-id').textContent = cita.idCita;
+
+                const fechaFormat = new Date(cita.fechaHora).toLocaleString('es-ES', {
+                    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
+                    hour: '2-digit', minute: '2-digit'
+                });
+                document.getElementById('cita-fecha').innerHTML = `<i class="fas fa-calendar-alt"></i> ${fechaFormat}`;
+
+                document.getElementById('taller-nombre').textContent = cita.tallerNombre;
+                document.getElementById('taller-direccion').innerHTML = `<i class="fas fa-map-marker-alt"></i> ${cita.tallerDireccion}`;
+                document.getElementById('taller-telefono').innerHTML = `<i class="fas fa-phone"></i> ${cita.tallerTelefono}`;
+
+                document.getElementById('cita-motivo').textContent = cita.motivo;
+
+                // Configurar Chat Nombre
+                chatTallerNombre.innerHTML = `<i class="fas fa-tools"></i> ${cita.tallerNombre}`;
+
+                // Estado
+                const badge = document.getElementById('estado-badge');
+                const estadoClass = cita.estado.replace(/\s+/g, '-');
+                badge.className = `status-badge status-${estadoClass}`;
+                badge.textContent = cita.estado;
+
+                // Acciones dinámicas
+                const actionsContainer = document.getElementById('actions-container');
+                actionsContainer.innerHTML = ''; // Limpiar
+
+                if (cita.estado === 'Pendiente' || cita.estado === 'Pendiente de Cotización') {
+                    // Botón para cancelar
+                    actionsContainer.innerHTML = `
+                        <button class="btn btn-danger" id="btnCancelCita">
+                            <i class="fas fa-times-circle"></i> Cancelar Cita
+                        </button>
+                    `;
+                    document.getElementById('btnCancelCita').addEventListener('click', cancelarCita);
+                }
+                else if (cita.estado === 'Cotizado') {
+                    // Botón Ver Cotización
+                    actionsContainer.innerHTML = `
+                        <button class="btn btn-primary" id="btnViewQuote">
+                            <i class="fas fa-file-invoice-dollar"></i> Ver y Aceptar Cotización
+                        </button>
+                    `;
+                    document.getElementById('btnViewQuote').addEventListener('click', () => {
+                        openQuoteModal(idCita, cita.idMecanico);
+                    });
+                }
+                else if (cita.estado === 'Completado') {
+                    document.getElementById('ticket-action').style.display = 'block';
+
+                    // Si el ticket se unificó correctamente, la ruta para descargarlo sería por idCita
+                    // Como ahora el ticket se genera por el ID de compra, la lógica original era:
+                    // `/api/tickets/cita/${idCita}/pdf` pero si se asocia al ticket, hay que cambiarlo
+                    // De momento, redirigimos a la confirmación de la cita si tenemos cómo saber el id del ticket
+                    // o podemos ir a historial
+                    document.getElementById('btnDownloadTicket').onclick = () => {
+                        window.location.href = 'historial_cliente.html';
+                    };
+                }
+
+                // Mostrar contenido
+                loadingContainer.style.display = 'none';
+                contentContainer.style.display = 'block';
+
+                // Iniciar contador de mensajes no leídos
+                checkUnreadMessages(idCita);
+                setInterval(() => checkUnreadMessages(idCita), 5000);
+
+            } catch (error) {
+                loadingContainer.innerHTML = `
+                    <div style="text-align: center; color: #e74c3c; padding: 40px;">
+                        <i class="fas fa-exclamation-triangle fa-3x" style="margin-bottom: 15px;"></i>
+                        <h2>Error al cargar la cita</h2>
+                        <p>${error.message}</p>
+                        <a href="mis_citas.html" class="btn btn-secondary" style="margin-top:20px;">Volver a Mis Citas</a>
+                    </div>
+                `;
+            }
+
+            // ==========================================
+            // Lógica de Cotización y Pagos
+            // ==========================================
+            const modal = document.getElementById('quoteModal');
+            let quoteData = null;
+
+            async function openQuoteModal(idCita, idMecanico) {
+                try {
+                    const quoteRes = await fetch(API_URL + `/api/citas/${idCita}/cotizacion`, {
+                        headers: getAuthHeaders(),
+                        credentials: 'include'
+                    });
+                    if (!quoteRes.ok) throw new Error('Error al obtener la cotización');
+
+                    quoteData = await quoteRes.json();
+
+                    document.getElementById('quoteDescription').textContent = quoteData.descripcion;
+                    document.getElementById('quoteTotal').textContent = `$${parseFloat(quoteData.costoTotal).toFixed(2)} MXN`;
+                    document.getElementById('quoteDate').textContent = new Date(quoteData.fechaCotizacion).toLocaleDateString('es-ES');
+
+                    // Resetear estado del modal
+                    document.getElementById('quoteInitialActions').style.display = 'flex';
+                    document.getElementById('paymentMethodsSection').classList.remove('active');
+                    isQuoteAccepted = false;
+
+                    const paypalContainer = document.getElementById('paypal-button-container');
+                    paypalContainer.innerHTML = '';
+
+                    modal.classList.add('active');
+                } catch (err) {
+                    alert('No se pudo cargar la cotización: ' + err.message);
                 }
             }
 
-            // ----- Adjuntar imagen -----
-            attachImgBtn.addEventListener('click', () => imgFileInput.click());
+            document.getElementById('closeQuoteModal').addEventListener('click', () => {
+                modal.classList.remove('active');
+            });
 
-            imgFileInput.addEventListener('change', (e) => {
+            // Al rechazar la cotización
+            document.getElementById('btnRejectQuote').addEventListener('click', async () => {
+                if (!confirm('¿Estás seguro de rechazar esta cotización? La cita será cancelada.')) return;
+
+                try {
+                    const res = await fetch(API_URL + `/api/citas/${idCita}/rechazar-cotizacion`, {
+                        method: 'PUT',
+                        headers: getAuthHeaders(),
+                        credentials: 'include'
+                    });
+                    if (res.ok) {
+                        alert('Cotización rechazada. La cita ha sido cancelada.');
+                        window.location.reload();
+                    } else {
+                        throw new Error('No se pudo rechazar');
+                    }
+                } catch (e) {
+                    alert(e.message);
+                }
+            });
+
+            // Al aceptar la cotización -> Iniciar Proceso Directo
+            document.getElementById('btnAcceptQuote').addEventListener('click', async () => {
+                if (!quoteData) return;
+
+                if (!confirm('¿Estás seguro de aceptar la cotización? El mecánico comenzará el trabajo y la cita pasará a estar En Proceso.')) return;
+
+                try {
+                    const res = await fetch(API_URL + '/api/citas/' + idCita + '/aprobar-cotizacion', {
+                        method: 'PUT',
+                        headers: getAuthHeaders(),
+                        credentials: 'include'
+                    });
+                    if (res.ok) {
+                        alert('Cotización aprobada. El servicio ha comenzado y está En Proceso.');
+                        window.location.reload();
+                    } else {
+                        const err = await res.json();
+                        throw new Error(err.error || 'Error al aprobar cotización');
+                    }
+                } catch (e) {
+                    alert(e.message);
+                }
+            });
+
+            // Botón Volver a opciones en Modal
+            document.getElementById('btnCancelPayment').addEventListener('click', () => {
+                document.getElementById('quoteInitialActions').style.display = 'flex';
+                document.getElementById('paymentMethodsSection').classList.remove('active');
+            });
+
+            // =============== FLUJO MERCADO PAGO ===============
+            document.getElementById('btnMercadoPago').addEventListener('click', async () => {
+                if (!quoteData) return;
+                try {
+                    const mpConfigRes = await fetch(API_URL + '/api/mercadopago/public-key', {
+                        headers: getAuthHeaders(),
+                        credentials: 'include'
+                    });
+                    const mpConfig = await mpConfigRes.json();
+                    const mp = new MercadoPago(mpConfig.publicKey, { locale: 'es-MX' });
+
+                    const preferenceData = {
+                        title: `Servicio Automotriz - Cita ${idCita}`,
+                        quantity: 1,
+                        price: parseFloat(quoteData.costoTotal),
+                        idCita: idCita,
+                        idMecanico: citaDataActual?.idMecanico
+                    };
+
+                    const response = await fetch(API_URL + '/api/mercadopago/create-preference', {
+                        method: 'POST',
+                        headers: getAuthHeaders('application/json'),
+                        credentials: 'include',
+                        body: JSON.stringify(preferenceData)
+                    });
+
+                    const prefRes = await response.json();
+
+                    if (prefRes.id) {
+                        window.location.href = `https://www.mercadopago.com.mx/checkout/v1/redirect?pref_id=${prefRes.id}`;
+                    } else {
+                        throw new Error('No se recibió ID de preferencia');
+                    }
+                } catch (error) {
+                    console.error('Error MP:', error);
+                    alert('Ocurrió un error al procesar con Mercado Pago.');
+                }
+            });
+
+            // =============== FLUJO PAYPAL ===============
+            function renderPayPalButton(amount, description, citaId, mecanicoId) {
+                const container = document.getElementById('paypal-button-container');
+                container.innerHTML = '';
+
+                paypal.Buttons({
+                    createOrder: async function () {
+                        try {
+                            const res = await fetch(API_URL + '/api/paypal/create-order', {
+                                method: 'POST',
+                                headers: getAuthHeaders('application/json'),
+                                credentials: 'include',
+                                body: JSON.stringify({
+                                    amount: amount,
+                                    description: description,
+                                    idCita: citaId,
+                                    idMecanico: mecanicoId
+                                })
+                            });
+                            const orderAuth = await res.json();
+                            return orderAuth.id;
+                        } catch (err) {
+                            console.error('Error creando orden paypal:', err);
+                            alert('No se pudo iniciar PayPal');
+                        }
+                    },
+                    onApprove: async function (data) {
+                        try {
+                            const verifyRes = await fetch(API_URL + '/api/paypal/capture-order', {
+                                method: 'POST',
+                                headers: getAuthHeaders('application/json'),
+                                credentials: 'include',
+                                body: JSON.stringify({
+                                    orderID: data.orderID,
+                                    idCita: citaId,
+                                    idMecanico: mecanicoId
+                                })
+                            });
+                            const verifyData = await verifyRes.json();
+
+                            if (verifyData.success) {
+                                // Aquí se actualiza el estado localmente asumiendo éxito
+                                await fetch(API_URL + `/api/citas/${citaId}/aprobar-cotizacion`, {
+                                    method: 'PUT',
+                                    headers: getAuthHeaders(),
+                                    credentials: 'include'
+                                });
+                                // Redirigir al ticket de confirmación genérico indicando que es de cita
+                                window.location.href = `ticket_confirmacion.html?tipo=cita&id=${citaId}&ticket=${verifyData.ticketId || ''}`;
+                            } else {
+                                alert('El pago fue procesado, pero ocurrió un error en la verificación.');
+                            }
+                        } catch (err) {
+                            console.error('Error capturando orden:', err);
+                            alert('Error al verificar el pago con PayPal.');
+                        }
+                    },
+                    onError: function (err) {
+                        console.error('PayPal Error:', err);
+                        alert('Ocurrió un error con el procesador de PayPal.');
+                    }
+                }).render('#paypal-button-container');
+            }
+
+
+            // ==========================================
+            // LÓGICA DEL CHAT
+            // ==========================================
+
+            // Textarea auto-resize
+            chatInput.addEventListener('input', function () {
+                this.style.height = 'auto';
+                this.style.height = (this.scrollHeight) + 'px';
+                if (this.value === '') {
+                    this.style.height = '45px';
+                }
+            });
+
+            // Botón de adjuntar imagen abre el input file
+            attachBtn.addEventListener('click', () => {
+                fileInput.click();
+            });
+
+            // Click en la previsualización del chat para abrir lightbox
+            imagePreviewElement.addEventListener('click', () => {
+                if (currentImageBase64) {
+                    openLightbox(currentImageBase64);
+                }
+            });
+
+            // Manejar selección de archivo
+            fileInput.addEventListener('change', (e) => {
                 const file = e.target.files[0];
                 if (!file) return;
 
-                if (!file.type.startsWith('image/')) {
-                    alert('Solo se permiten archivos de imagen.');
-                    imgFileInput.value = '';
+                // Validar tipo
+                if (!file.type.match('image.*')) {
+                    alert('Por favor, selecciona solo imágenes (JPEG, PNG, WEBP).');
+                    resetFileInput();
                     return;
                 }
 
-                const maxSize = 5 * 1024 * 1024; // 5MB
-                if (file.size > maxSize) {
-                    alert('La imagen es demasiado grande. Máximo 5MB.');
-                    imgFileInput.value = '';
+                // Validar tamaño (máx 5MB)
+                if (file.size > 5 * 1024 * 1024) {
+                    alert('La imagen es demasiado grande. Selecciona una menor a 5MB.');
+                    resetFileInput();
                     return;
                 }
 
                 const reader = new FileReader();
-                reader.onload = (ev) => {
-                    selectedImageData = {
-                        base64: ev.target.result,
-                        nombre: file.name,
-                        size: (file.size / 1024).toFixed(0) + ' KB'
-                    };
-                    imgPreviewThumb.src = ev.target.result;
-                    imgPreviewName.textContent = file.name;
-                    imgPreviewSize.textContent = selectedImageData.size;
-                    imgPreviewArea.classList.add('visible');
-                    chatInput.placeholder = 'Añade un mensaje (opcional)...';
+                reader.onload = (event) => {
+                    currentImageBase64 = event.target.result;
+                    imagePreviewElement.src = currentImageBase64;
+                    imagePreviewName.textContent = file.name;
+                    imagePreviewContainer.classList.add('active');
+                    chatInput.focus();
                 };
                 reader.readAsDataURL(file);
             });
 
-            removeImgBtn.addEventListener('click', () => {
-                selectedImageData = null;
-                imgFileInput.value = '';
-                imgPreviewArea.classList.remove('visible');
-                chatInput.placeholder = 'Escribe un mensaje...';
+            // Botón para quitar la imagen adjuntada
+            removeImageBtn.addEventListener('click', resetFileInput);
+
+            function resetFileInput() {
+                fileInput.value = '';
+                currentImageBase64 = null;
+                imagePreviewContainer.classList.remove('active');
+                imagePreviewElement.src = '';
+            }
+
+            openChatBtn.addEventListener('click', () => {
+                modalChat.classList.add('active');
+                loadChatMessages(idCita);
+                // Iniciar polling al abrir
+                if (!chatInterval) {
+                    chatInterval = setInterval(() => loadChatMessages(idCita), 3000);
+                }
+                // Ocultar badge
+                chatBadge.style.display = 'none';
+                chatBadge.textContent = '0';
+
+                setTimeout(() => chatInput.focus(), 100);
             });
 
-            // ----- Enviar mensaje -----
-            sendChatBtn.addEventListener('click', enviarMensaje);
-            chatInput.addEventListener('keydown', (e) => {
+            closeChatBtn.addEventListener('click', () => {
+                modalChat.classList.remove('active');
+                if (chatInterval) {
+                    clearInterval(chatInterval);
+                    chatInterval = null;
+                }
+            });
+
+            // Enviar mensaje con ENTER (y shift+enter para nueva línea)
+            chatInput.addEventListener('keypress', (e) => {
                 if (e.key === 'Enter' && !e.shiftKey) {
                     e.preventDefault();
-                    enviarMensaje();
+                    sendMessageWrapper();
                 }
             });
 
-            async function enviarMensaje() {
-                const texto = chatInput.value.trim();
-                const tieneImagen = selectedImageData !== null;
+            chatSendBtn.addEventListener('click', sendMessageWrapper);
 
-                if (!texto && !tieneImagen) return;
+            function sendMessageWrapper() {
+                const text = chatInput.value.trim();
 
-                sendChatBtn.disabled = true;
+                if (currentImageBase64) {
+                    // Si hay imagen, enviarla
+                    sendChatMessage(idCita, currentImageBase64, 'imagen', fileInput.files[0]?.name);
 
-                try {
-                    if (tieneImagen) {
-                        // 1. Enviar imagen
-                        const resImg = await fetch(`/api/chat/${idCita}`, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                                contenido: selectedImageData.base64,
-                                tipoContenido: 'imagen',
-                                nombreArchivo: selectedImageData.nombre
-                            })
-                        });
-                        if (!resImg.ok) {
-                            const err = await resImg.json();
-                            alert('Error al enviar imagen: ' + (err.error || 'Error desconocido'));
-                        }
-                        // Limpiar imagen
-                        removeImgBtn.click();
+                    // Si además hay texto, enviarlo justo después
+                    if (text) {
+                        setTimeout(() => {
+                            sendChatMessage(idCita, text, 'texto');
+                        }, 500);
                     }
 
-                    if (texto) {
-                        // 2. Enviar texto
-                        const resText = await fetch(`/api/chat/${idCita}`, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                                contenido: texto,
-                                tipoContenido: 'texto'
-                            })
-                        });
-                        if (!resText.ok) {
-                            const err = await resText.json();
-                            alert('Error al enviar mensaje: ' + (err.error || 'Error desconocido'));
-                        }
-                    }
-
+                    // Limpiar imagen y texto
+                    resetFileInput();
                     chatInput.value = '';
-                    await loadChatHistory(idCita, true);
-                    chatMessages.scrollTop = chatMessages.scrollHeight;
-
-                } catch (e) {
-                    console.error('[Chat] Error al enviar:', e);
-                    alert('Error de conexión al enviar el mensaje.');
-                } finally {
-                    sendChatBtn.disabled = false;
+                    chatInput.style.height = '45px';
+                } else if (text) {
+                    // Solo texto
+                    sendChatMessage(idCita, text, 'texto');
+                    chatInput.value = '';
+                    chatInput.style.height = '45px';
                 }
             }
 
-            // ----- Auto-resize textarea -----
-            chatInput.addEventListener('input', () => {
-                chatInput.style.height = 'auto';
-                chatInput.style.height = Math.min(chatInput.scrollHeight, 100) + 'px';
-            });
+            async function checkUnreadMessages(idCitaParam) {
+                if (modalChat.classList.contains('active')) return; // No contar si está abierto
 
-            // ----- Lightbox -----
-            window.abrirLightbox = (src) => {
-                lightboxImg.src = src;
-                imgLightbox.classList.add('active');
-            };
-            imgLightbox.addEventListener('click', () => imgLightbox.classList.remove('active'));
-
-            // ----- Utilidades -----
-            function escapeHtml(text) {
-                const div = document.createElement('div');
-                div.appendChild(document.createTextNode(text));
-                return div.innerHTML;
+                try {
+                    const res = await fetch(API_URL + `/api/chat/${idCitaParam}/no-leidos`, {
+                        headers: getAuthHeaders(),
+                        credentials: 'include'
+                    });
+                    if (res.ok) {
+                        const data = await res.json();
+                        if (data.noLeidos > 0) {
+                            chatBadge.textContent = data.noLeidos;
+                            chatBadge.style.display = 'inline-block';
+                        } else {
+                            chatBadge.style.display = 'none';
+                        }
+                    }
+                } catch (e) { console.error('Error contando no leídos:', e); }
             }
 
-            // Función para cancelar cita
-            async function cancelarCita(idCita) {
+            async function loadChatMessages(idCitaParam) {
                 try {
-                    const response = await fetch(`/api/citas/${idCita}`, {
-                        method: 'DELETE'
+                    const res = await fetch(API_URL + `/api/chat/${idCitaParam}`, {
+                        headers: getAuthHeaders(),
+                        credentials: 'include'
+                    });
+                    if (res.ok) {
+                        const mensajes = await res.json();
+                        renderMessages(mensajes);
+                    }
+                } catch (e) {
+                    console.error('Error cargando mensajes:', e);
+                }
+            }
+
+            async function sendChatMessage(idCitaParam, contenidoParam, tipoParams = 'texto', nombreArchivo = null) {
+
+                const bodyObj = {
+                    contenido: contenidoParam,
+                    tipoContenido: tipoParams
+                };
+
+                if (nombreArchivo) {
+                    bodyObj.nombreArchivo = nombreArchivo;
+                }
+
+                // Mostrar temporalmente en la UI (Optimistic UI)
+                // Obtenemos el nombre del paciente/cliente del sessionStorage:
+                const myUserName = sessionStorage.getItem('userName') || 'Yo';
+
+                appendMessageToUI({
+                    remitenteTipo: 'cliente',
+                    tipoContenido: tipoParams,
+                    contenido: contenidoParam,
+                    fechaEnvio: new Date().toISOString(),
+                    remitenteNombre: myUserName
+                }, true); // El true indica que se desplace hacia abajo
+
+                try {
+                    // Deshabilitar botón temporalmente para imágenes grandes
+                    if (tipoParams === 'imagen') {
+                        chatSendBtn.disabled = true;
+                        chatSendBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                    }
+
+                    const res = await fetch(API_URL + `/api/chat/${idCitaParam}`, {
+                        method: 'POST',
+                        headers: getAuthHeaders('application/json'),
+                        credentials: 'include',
+                        body: JSON.stringify(bodyObj)
                     });
 
-                    const result = await response.json();
-
-                    if (response.ok) {
-                        alert(result.message || 'Cita cancelada exitosamente');
-                        window.location.href = 'mis_citas.html';
-                    } else {
-                        alert(result.error || 'Error al cancelar la cita');
+                    if (!res.ok) {
+                        const err = await res.json();
+                        throw new Error(err.error || 'Error al enviar');
                     }
-                } catch (error) {
-                    console.error('Error:', error);
-                    alert('Error de conexión al cancelar la cita');
+
+                    // Al retornar se volverá a cargar por el polling normal
+                    loadChatMessages(idCitaParam);
+
+                } catch (e) {
+                    console.error(e);
+                    alert(`Error enviando mensaje: ${e.message}`);
+                    loadChatMessages(idCitaParam); // Recargar para limpiar el mensaje optimista si falló
+                } finally {
+                    chatSendBtn.disabled = false;
+                    chatSendBtn.innerHTML = '<i class="fas fa-paper-plane"></i>';
+                }
+            }
+
+            function renderMessages(mensajes) {
+                // Prevenir re-render innecesario si no hay cambios
+                // En un sistema real compararíamos el ID del último mensaje
+                chatMessages.innerHTML = '';
+
+                if (mensajes.length === 0) {
+                    chatMessages.innerHTML = '<div style="text-align:center; color:#888; margin-top:50px;">Aún no hay mensajes. ¡Envía un mensaje al taller!</div>';
+                    return;
+                }
+
+                mensajes.forEach(m => appendMessageToUI(m, false));
+
+                // Hacer scroll abajo suavemente
+                chatMessages.scrollTo({
+                    top: chatMessages.scrollHeight,
+                    behavior: 'smooth'
+                });
+            }
+
+            function appendMessageToUI(m, scrollToBottom = true) {
+                const isMine = m.remitenteTipo === 'cliente';
+                const div = document.createElement('div');
+                div.className = `chat-message ${isMine ? 'cliente' : 'mecanico'}`;
+
+                const hora = new Date(m.fechaEnvio).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+                let contentHTML = '';
+
+                if (m.tipoContenido === 'imagen') {
+                    contentHTML = `
+                        <img src="${m.contenido}" class="chat-message-image" alt="Imagen enviada" onclick="openLightbox('${m.contenido}')">
+                    `;
+                } else {
+                    // Escapar HTML básico para texto
+                    const safeContenido = m.contenido
+                        .replace(/&/g, "&amp;")
+                        .replace(/</g, "&lt;")
+                        .replace(/>/g, "&gt;")
+                        .replace(/"/g, "&quot;")
+                        .replace(/'/g, "&#039;")
+                        .replace(/\\n/g, "<br>");
+
+                    contentHTML = `<div style="line-height:1.4;">${safeContenido}</div>`;
+                }
+
+                div.innerHTML = `
+                    ${contentHTML}
+                    <span class="chat-time">${hora}</span>
+                `;
+                chatMessages.appendChild(div);
+
+                if (scrollToBottom) {
+                    chatMessages.scrollTo({
+                        top: chatMessages.scrollHeight,
+                        behavior: 'smooth'
+                    });
+                }
+            }
+
+            // ==========================================
+            // LÓGICA DE LIGHTBOX PARA IMÁGENES
+            // ==========================================
+            // Exponemos la función al entorno global para que funcione el onclick
+            window.openLightbox = function (src) {
+                lightboxImage.src = src;
+                lightboxOverlay.classList.add('active');
+            };
+
+            lightboxClose.addEventListener('click', () => {
+                lightboxOverlay.classList.remove('active');
+                setTimeout(() => { lightboxImage.src = ''; }, 300); // Limpiar src después de la transición
+            });
+
+            // Cerrar lightbox al hacer clic fuera de la imagen
+            lightboxOverlay.addEventListener('click', (e) => {
+                if (e.target === lightboxOverlay) {
+                    lightboxOverlay.classList.remove('active');
+                    setTimeout(() => { lightboxImage.src = ''; }, 300);
+                }
+            });
+
+            // Función de Cancelar
+            async function cancelarCita() {
+                if (!confirm('¿Estás seguro de cancelar tu cita? Esta acción no se puede deshacer.')) return;
+                try {
+                    const response = await fetch(API_URL + `/api/citas/${idCita}`, {
+                        method: 'DELETE',
+                        headers: getAuthHeaders(),
+                        credentials: 'include'
+                    });
+                    if (response.ok) {
+                        alert('Cita cancelada con éxito.');
+                        window.location.reload();
+                    } else {
+                        const err = await response.json();
+                        alert('Error: ' + err.error);
+                    }
+                } catch (e) {
+                    alert('Ocurrió un error de conexión.');
                 }
             }
         });
-
-        let mp; // Declarar mp en un alcance más alto
-
-        // 1. Obtener la Public Key del servidor
-        fetch('/api/mercadopago/public-key')
-            .then(response => response.json())
-            .then(data => {
-                if (data.publicKey) {
-                    // 2. Inicializar MercadoPago con la clave obtenida
-                    mp = new MercadoPago(data.publicKey, {
-                        locale: 'es-MX'
-                    });
-                } else {
-                    console.error('Error: Public key no recibida del servidor.');
-                    const messageDiv = document.getElementById('payment-message');
-                    messageDiv.textContent = 'Error de configuración de pagos. Contacte a soporte.';
-                    messageDiv.style.backgroundColor = '#e74c3c';
-                    messageDiv.style.display = 'block';
-                }
-            })
-            .catch(error => {
-                console.error('Error fetching public key:', error);
-                const messageDiv = document.getElementById('payment-message');
-                messageDiv.textContent = 'No se pudo inicializar el sistema de pagos.';
-                messageDiv.style.backgroundColor = '#e74c3c';
-                messageDiv.style.display = 'block';
-            });
-
-
-        function handleMercadoPago() {
-            // Asegurarse de que mp está inicializado
-            if (!mp) {
-                console.error('Mercado Pago SDK no se ha inicializado.');
-                alert('El sistema de pagos no está listo. Por favor, espera un momento y vuelve a intentarlo.');
-                return;
-            }
-
-            // Deshabilitar el botón para evitar clics múltiples
-            const pagarBtn = document.getElementById('pagarMercadoPago');
-            pagarBtn.disabled = true;
-
-            fetch('/api/mercadopago/create-preference', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    id_cotizacion: 'COTO001' // ID de cotización de prueba
-                })
-            })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Error en el servidor al crear la preferencia');
-                    }
-                    return response.json();
-                })
-                .then(preference => {
-                    // Ocultar botón original y mostrar el de MP
-                    pagarBtn.style.display = 'none';
-
-                    mp.checkout({
-                        preference: {
-                            id: preference.id
-                        },
-                        render: {
-                            container: '#mercadopago-button-container',
-                            label: 'Pagar ahora'
-                        }
-                    });
-                })
-                .catch(error => {
-                    console.error('Error creating preference:', error);
-                    const messageDiv = document.getElementById('payment-message');
-                    messageDiv.textContent = 'Ocurrió un error al procesar su pago. Por favor, contacte a soporte.';
-                    messageDiv.style.backgroundColor = '#e74c3c'; // Rojo
-                    messageDiv.style.display = 'block';
-                    // Reactivar el botón si hay un error
-                    pagarBtn.disabled = false;
-                });
-        }
-    </script>
-
-    <!-- 
-        SDK de PayPal 
-        RECUERDA REEMPLAZAR 'TU_CLIENT_ID_DE_SANDBOX' con tu Client ID real de Sandbox que está en tu archivo .env
-    -->
-    <script
-        src="https://www.paypal.com/sdk/js?client-id=ASU5dGljUFL37x21VY77rYpGSXaJfOtIYXEesc37ps-JYJR3YOPR2gxPfTP1no5bS_KwMBAhfesPUbUb&currency=MXN"></script>
-
-    <script>
-        // Lógica para renderizar el botón de PayPal
-        // Asumimos que tenemos un id_cotizacion para este ejemplo
-        const idCotizacionParaPagar = 1;
-
-        paypal.Buttons({
-            // 1. Crear la orden en nuestro servidor
-            createOrder: function () {
-                return fetch('/api/paypal/create-order', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    // Enviamos el ID de la cotización que queremos pagar
-                    body: JSON.stringify({
-                        id_cotizacion: 'COTO001' // ID de cotización de prueba
-                    })
-                }).then(function (res) {
-                    if (!res.ok) {
-                        // Si el servidor responde con un error, lo mostramos
-                        return res.json().then(err => {
-                            const messageDiv = document.getElementById('payment-message');
-                            messageDiv.textContent = err.message || 'Error del servidor al crear la orden.';
-                            messageDiv.style.backgroundColor = '#e74c3c'; // Rojo
-                            messageDiv.style.display = 'block';
-                            throw new Error(err.message || 'Error del servidor');
-                        });
-                    }
-                    return res.json();
-                }).then(function (orderData) {
-                    console.log('Order ID:', orderData.orderID);
-                    return orderData.orderID;
-                }).catch(function (err) {
-                    console.error('Error en createOrder:', err);
-                });
-            },
-
-            // 2. Capturar el pago cuando el usuario aprueba
-            onApprove: function (data, actions) {
-                const messageDiv = document.getElementById('payment-message');
-                return fetch('/api/paypal/capture-order', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        orderID: data.orderID
-                    })
-                }).then(function (res) {
-                    if (!res.ok) {
-                        return res.json().then(err => { throw new Error(err.message || 'Error del servidor'); });
-                    }
-                    return res.json();
-                }).then(function (orderData) {
-                    console.log('Pago capturado:', orderData);
-
-                    // Ocultar el botón de PayPal
-                    document.getElementById('paypal-button-container').style.display = 'none';
-
-                    // Mostrar mensaje de éxito
-                    messageDiv.textContent = '¡Pago completado con éxito! Redirigiendo...';
-                    messageDiv.style.backgroundColor = '#2ecc71'; // Verde
-                    messageDiv.style.display = 'block';
-
-                    // Redirigir después de unos segundos
-                    setTimeout(() => window.location.href = 'mis_citas.html', 3000);
-
-                }).catch(function (err) {
-                    console.error('Error en onApprove:', err);
-
-                    // Mostrar mensaje de error
-                    messageDiv.textContent = 'Ocurrió un error al procesar su pago. Por favor, contacte a soporte.';
-                    messageDiv.style.backgroundColor = '#e74c3c'; // Rojo
-                    messageDiv.style.display = 'block';
-                });
-            },
-
-            // 3. Manejar errores del lado del cliente
-            onError: function (err) {
-                console.error('Error en el botón de PayPal:', err);
-                const messageDiv = document.getElementById('payment-message');
-                messageDiv.textContent = 'Ocurrió un error inesperado con PayPal. Por favor, recarga la página.';
-                messageDiv.style.backgroundColor = '#e74c3c'; // Rojo
-                messageDiv.style.display = 'block';
-            },
-
-            // 4. Manejar cancelación del usuario
-            onCancel: function (data) {
-                console.log('Pago cancelado. Order ID:', data.orderID);
-                const messageDiv = document.getElementById('payment-message');
-                messageDiv.textContent = 'Has cancelado el pago.';
-                messageDiv.style.backgroundColor = '#f39c12'; // Naranja
-                messageDiv.style.display = 'block';
-            }
-        }).render('#paypal-button-container');
     </script>
 </body>
 

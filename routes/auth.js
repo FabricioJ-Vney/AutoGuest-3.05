@@ -100,6 +100,7 @@ router.post('/login', async (req, res) => {
 
         // Crear sesión
         req.session.userId = user.idUsuario;
+        req.session.role = 'cliente'; // Variable necesaria para el Chat y otros módulos
 
         res.status(200).json({
             success: true,

@@ -82,7 +82,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 50px;
+            margin-bottom: 30px;
         }
 
         .page-header h1 {
@@ -91,25 +91,236 @@
             margin: 0;
         }
 
+        /* ===== FILTROS ===== */
+        .filters-section {
+            margin-bottom: 28px;
+        }
+
+        .filters-bar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            padding: 16px 20px;
+            background-color: #2c2c2c;
+            border-radius: 12px 12px 0 0;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
+            border-bottom: 1px solid #383838;
+        }
+
+        .filters-order-bar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            padding: 10px 20px;
+            background-color: #252525;
+            border-radius: 0 0 12px 12px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .filters-label {
+            color: #888;
+            font-size: 0.82em;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-right: 2px;
+            white-space: nowrap;
+        }
+
+        .filter-btn {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            padding: 8px 16px;
+            border-radius: 50px;
+            border: 1.5px solid #3a3a3a;
+            background: transparent;
+            color: #c0c0c0;
+            font-size: 0.88em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.22s ease;
+            white-space: nowrap;
+        }
+
+        .filter-btn:hover {
+            border-color: #f39c12;
+            color: #f39c12;
+            background: rgba(243, 156, 18, 0.07);
+        }
+
+        .filter-btn.active {
+            background: #f39c12;
+            border-color: #f39c12;
+            color: #1a1a1a;
+            box-shadow: 0 3px 10px rgba(243, 156, 18, 0.35);
+        }
+
+        .filter-btn.active-pendiente {
+            background: rgba(243, 156, 18, 0.15);
+            border-color: #f39c12;
+            color: #f39c12;
+            box-shadow: 0 3px 10px rgba(243, 156, 18, 0.2);
+        }
+
+        .filter-btn.active-proceso {
+            background: rgba(52, 152, 219, 0.15);
+            border-color: #3498db;
+            color: #3498db;
+            box-shadow: 0 3px 10px rgba(52, 152, 219, 0.2);
+        }
+
+        .filter-btn.active-completado {
+            background: rgba(46, 204, 113, 0.15);
+            border-color: #2ecc71;
+            color: #2ecc71;
+            box-shadow: 0 3px 10px rgba(46, 204, 113, 0.2);
+        }
+
+        .filter-btn.active-cancelado {
+            background: rgba(231, 76, 60, 0.15);
+            border-color: #e74c3c;
+            color: #e74c3c;
+            box-shadow: 0 3px 10px rgba(231, 76, 60, 0.2);
+        }
+
+        /* Contador de badge */
+        .filter-count {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 20px;
+            height: 20px;
+            padding: 0 5px;
+            border-radius: 50px;
+            background: rgba(255, 255, 255, 0.12);
+            font-size: 0.78em;
+            font-weight: 700;
+            line-height: 1;
+        }
+
+        .filter-btn.active .filter-count,
+        .filter-btn.active-pendiente .filter-count,
+        .filter-btn.active-proceso .filter-count,
+        .filter-btn.active-completado .filter-count,
+        .filter-btn.active-cancelado .filter-count {
+            background: rgba(0, 0, 0, 0.15);
+        }
+
+        /* Separador */
+        .filters-divider {
+            width: 1px;
+            height: 28px;
+            background: #3a3a3a;
+            margin: 0 4px;
+        }
+
+        /* Botón de orden */
+        .sort-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 13px;
+            border-radius: 50px;
+            border: 1.5px solid #3a3a3a;
+            background: transparent;
+            color: #888;
+            font-size: 0.82em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.22s ease;
+            white-space: nowrap;
+        }
+
+        .sort-btn:hover,
+        .sort-btn.active-sort {
+            border-color: #5d9cec;
+            color: #5d9cec;
+            background: rgba(93, 156, 236, 0.08);
+        }
+
+        .sort-btn.active-sort {
+            background: rgba(93, 156, 236, 0.13);
+            box-shadow: 0 2px 8px rgba(93, 156, 236, 0.15);
+        }
+
+        /* Etiqueta de orden activo */
+        .order-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 10px;
+            border-radius: 50px;
+            background: rgba(93, 156, 236, 0.1);
+            border: 1px solid rgba(93, 156, 236, 0.25);
+            color: #7daee8;
+            font-size: 0.8em;
+            font-weight: 600;
+            margin-left: auto;
+        }
+
+        /* Resultado de filtro */
+        .filter-results-info {
+            font-size: 0.88em;
+            color: #888;
+            margin-bottom: 16px;
+            padding-left: 4px;
+        }
+
+        .filter-results-info span {
+            color: #f39c12;
+            font-weight: 600;
+        }
+
+        /* ===== LISTA DE CITAS ===== */
         .appointments-list {
             display: grid;
-            gap: 25px;
+            gap: 20px;
         }
 
         .appointment-card {
             background-color: #2c2c2c;
             border-radius: 12px;
-            padding: 25px;
+            padding: 22px 25px;
             display: flex;
             align-items: center;
             justify-content: space-between;
             gap: 20px;
             flex-wrap: wrap;
             border-left: 5px solid #f39c12;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.25s ease;
+            animation: cardEntrance 0.3s ease forwards;
+        }
+
+        @keyframes cardEntrance {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .appointment-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
         }
 
         .appointment-card.Pendiente {
             border-left-color: #f39c12;
+        }
+
+        .appointment-card.Pendiente-de-Cotizacion {
+            border-left-color: #f39c12;
+        }
+
+        .appointment-card.Cotizado {
+            border-left-color: #9b59b6;
         }
 
         .appointment-card.En-Proceso {
@@ -122,13 +333,30 @@
 
         .appointment-card.Cancelado {
             border-left-color: #e74c3c;
-            opacity: 0.7;
+            opacity: 0.65;
         }
 
         .appointment-icon {
-            font-size: 2.5em;
-            color: #f39c12;
+            font-size: 2.2em;
             flex-shrink: 0;
+        }
+
+        .appointment-card.Pendiente .appointment-icon,
+        .appointment-card.Pendiente-de-Cotizacion .appointment-icon,
+        .appointment-card.Cotizado .appointment-icon {
+            color: #f39c12;
+        }
+
+        .appointment-card.En-Proceso .appointment-icon {
+            color: #3498db;
+        }
+
+        .appointment-card.Completado .appointment-icon {
+            color: #2ecc71;
+        }
+
+        .appointment-card.Cancelado .appointment-icon {
+            color: #e74c3c;
         }
 
         .appointment-details {
@@ -136,100 +364,101 @@
         }
 
         .appointment-details h3 {
-            font-size: 1.5em;
-            margin: 0 0 8px 0;
+            font-size: 1.35em;
+            margin: 0 0 6px 0;
             color: #ffffff;
         }
 
         .appointment-details p {
-            margin: 0;
+            margin: 3px 0;
             color: #c0c0c0;
-            font-size: 1em;
+            font-size: 0.95em;
             line-height: 1.5;
         }
 
-        .status-badge {
-            display: inline-block;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-weight: bold;
-            font-size: 0.9em;
-            margin-left: 5px;
+        .appointment-meta {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            flex-wrap: wrap;
+            margin-top: 8px;
         }
 
-        .status-badge.Pendiente {
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.88em;
+            color: #a0a0a0;
+        }
+
+        .meta-item i {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 10px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 0.82em;
+        }
+
+        .status-badge.Pendiente,
+        .status-badge.Pendiente-de-Cotizacion {
             color: #f39c12;
-            background: rgba(243, 156, 18, 0.1);
+            background: rgba(243, 156, 18, 0.12);
         }
 
         .status-badge.En-Proceso {
             color: #3498db;
-            background: rgba(52, 152, 219, 0.1);
+            background: rgba(52, 152, 219, 0.12);
+        }
+
+        .status-badge.Cotizado {
+            color: #9b59b6;
+            background: rgba(155, 89, 182, 0.12);
         }
 
         .status-badge.Completado {
             color: #2ecc71;
-            background: rgba(46, 204, 113, 0.1);
+            background: rgba(46, 204, 113, 0.12);
         }
 
         .status-badge.Cancelado {
             color: #e74c3c;
-            background: rgba(231, 76, 60, 0.1);
+            background: rgba(231, 76, 60, 0.12);
         }
 
-        .status-message {
-            margin-top: 5px;
-            font-style: italic;
-            color: #fff;
+        .card-actions {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 8px;
+            flex-shrink: 0;
         }
 
         .no-appointments {
             text-align: center;
             color: #888;
-            padding: 40px;
+            padding: 60px 40px;
             background-color: #2c2c2c;
             border-radius: 12px;
         }
 
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(5px);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
+        .no-appointments i {
+            font-size: 3em;
+            color: #444;
+            margin-bottom: 15px;
+            display: block;
         }
 
-        .modal-overlay.active {
-            display: flex;
-        }
-
-        .modal-content {
-            background-color: #2c2c2c;
-            padding: 40px;
-            border-radius: 12px;
-            width: 100%;
-            max-width: 500px;
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-        }
-
-        .close-button {
-            background: none;
-            border: none;
-            color: #a0a0a0;
-            font-size: 28px;
-            cursor: pointer;
+        .no-appointments p {
+            font-size: 1.1em;
+            margin: 0;
         }
     </style>
 </head>
@@ -240,10 +469,9 @@
         <div class="header-left">
             <a href="dashboard_cliente.html"><img src="../../imagenes/Logo_Autoguest.png" alt="Logo de AutoGuest"
                     class="logo"></a>
-            <a href="#" class="logout-btn">Cerrar Sesión</a>
         </div>
         <div class="header-right">
-            <div class="user-greeting">Â¡Hola, ...!</div>
+            <div class="user-greeting">¡Hola, ...!</div>
             <a href="dashboard_cliente.html" class="back-to-dashboard">
                 <i class="fas fa-arrow-left"></i>
                 <span>Volver al Panel</span>
@@ -252,45 +480,93 @@
     </header>
 
     <main class="page-container">
+        <!-- Cabecera de página -->
         <div class="page-header">
             <h1>Mis Citas</h1>
-            <button class="btn" id="addAppointmentBtn">Agendar Nueva Cita</button>
+            <button class="btn" id="addAppointmentBtn">
+                <i class="fas fa-plus" style="margin-right:6px;"></i>Agendar Nueva Cita
+            </button>
         </div>
+
+        <!-- Bloque de filtros y orden -->
+        <div class="filters-section">
+
+            <!-- Barra de filtros por estado -->
+            <div class="filters-bar">
+                <span class="filters-label"><i class="fas fa-filter" style="margin-right:4px;"></i>Estado:</span>
+
+                <button class="filter-btn active" id="filter-todas" data-filter="todas">
+                    <i class="fas fa-list"></i> Todas
+                    <span class="filter-count" id="count-todas">0</span>
+                </button>
+
+                <button class="filter-btn" id="filter-pendiente" data-filter="Pendiente">
+                    <i class="fas fa-clock"></i> Pendiente
+                    <span class="filter-count" id="count-pendiente">0</span>
+                </button>
+
+                <button class="filter-btn" id="filter-proceso" data-filter="En Proceso">
+                    <i class="fas fa-tools"></i> En Proceso
+                    <span class="filter-count" id="count-proceso">0</span>
+                </button>
+
+                <button class="filter-btn" id="filter-completado" data-filter="Completado">
+                    <i class="fas fa-check-circle"></i> Completado
+                    <span class="filter-count" id="count-completado">0</span>
+                </button>
+
+                <button class="filter-btn" id="filter-cancelado" data-filter="Cancelado">
+                    <i class="fas fa-times-circle"></i> Cancelado
+                    <span class="filter-count" id="count-cancelado">0</span>
+                </button>
+            </div>
+
+            <!-- Barra de ordenamiento -->
+            <div class="filters-order-bar">
+                <span class="filters-label"><i class="fas fa-sort" style="margin-right:4px;"></i>Ordenar:</span>
+
+                <button class="sort-btn active-sort" id="sort-reciente" data-sort="reciente">
+                    <i class="fas fa-arrow-down"></i> Más reciente primero
+                </button>
+
+                <button class="sort-btn" id="sort-antiguo" data-sort="antiguo">
+                    <i class="fas fa-arrow-up"></i> Más antiguo primero
+                </button>
+
+                <div class="filters-divider"></div>
+
+                <button class="sort-btn" id="sort-estado" data-sort="estado">
+                    <i class="fas fa-layer-group"></i> Por estado (Pendiente → Cancelado)
+                </button>
+
+                <!-- Indicador de orden activo -->
+                <div class="order-tag" id="orderTag">
+                    <i class="fas fa-sort-amount-down"></i>
+                    <span id="orderTagText">Más reciente primero</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Info del resultado -->
+        <div class="filter-results-info" id="filterResultsInfo"></div>
+
+        <!-- Lista de citas -->
         <div class="appointments-list" id="citasList"></div>
     </main>
 
-    <div class="modal-overlay" id="addAppointmentModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Agendar una Nueva Cita</h2>
-                <button class="close-button" id="closeModalBtn">Ã—</button>
-            </div>
-            <form id="addAppointmentForm">
-                <div class="form-group">
-                    <label for="modal-vehicle">Selecciona tu VehÃ­culo</label>
-                    <select id="modal-vehicle" class="form-control" required></select>
-                </div>
-                <div class="form-group">
-                    <label for="modal-date">Fecha y Hora</label>
-                    <input type="datetime-local" id="modal-date" class="form-control" required>
-                </div>
-                <button type="submit" class="btn">Confirmar Cita</button>
-            </form>
-        </div>
-    </div>
-
     <script>
+        const API_URL = 'http://localhost:3000';
         document.addEventListener('DOMContentLoaded', async () => {
-            // --- INICIO: GuardiÃ¡n de AutenticaciÃ³n y PersonalizaciÃ³n ---
+            // --- Guardián de Autenticación ---
             if (sessionStorage.getItem('isLoggedIn') !== 'true') {
-                alert('Tu sesiÃ³n ha expirado. Por favor, inicia sesiÃ³n de nuevo.');
+                alert('Tu sesión ha expirado. Por favor, inicia sesión de nuevo.');
                 window.location.href = '../../login_cliente.html';
                 return;
             }
 
             const userName = sessionStorage.getItem('userName');
             if (userName) {
-                document.querySelector('.header-right .user-greeting').textContent = `Â¡Hola, ${userName}!`;
+                document.querySelector('.header-right .user-greeting').textContent = `¡Hola, ${userName}!`;
             }
 
             const logoutBtn = document.querySelector('.logout-btn');
@@ -298,92 +574,314 @@
                 logoutBtn.addEventListener('click', async (e) => {
                     e.preventDefault();
                     try {
-                        const response = await fetch('/api/registro/logout', { method: 'POST' });
+                        const response = await fetch(API_URL + '/api/registro/logout', {
+                            method: 'POST',
+                            headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') },
+                            credentials: 'include'
+                        });
                         if (response.ok) {
                             sessionStorage.clear();
+                            localStorage.removeItem('token');
                             window.location.href = '../../index.html';
                         } else {
-                            alert('Error al cerrar sesiÃ³n.');
+                            alert('Error al cerrar sesión.');
                         }
                     } catch (error) {
-                        alert('Error de red al cerrar sesiÃ³n.');
+                        alert('Error de red al cerrar sesión.');
                     }
                 });
             }
-            // --- FIN: GuardiÃ¡n de AutenticaciÃ³n ---
 
-            const citasList = document.getElementById('citasList');
-            const addAppointmentBtn = document.getElementById('addAppointmentBtn');
-
-            // Redirigir a buscar talleres para agendar
-            addAppointmentBtn.addEventListener('click', () => {
+            // Botón agendar
+            document.getElementById('addAppointmentBtn').addEventListener('click', () => {
                 window.location.href = 'buscar_talleres.html';
             });
 
+            // ===== ESTADO GLOBAL =====
+            let todasLasCitas = [];         // Guardamos todas las citas originales
+            let filtroActivo = 'todas';     // Filtro actual
+            let ordenActivo = 'reciente';   // Orden actual: 'reciente' | 'antiguo' | 'estado'
+
+            // ===== PRIORIDAD DE ESTADOS para ordenar por grupo =====
+            const prioridadEstado = {
+                'Pendiente': 1,
+                'Pendiente de Cotización': 2,
+                'Cotizado': 3,
+                'En Proceso': 4,
+                'Completado': 5,
+                'Cancelado': 6
+            };
+
+            // ===== HELPERS =====
+            const getStatusIcon = (estado) => {
+                switch (estado) {
+                    case 'Pendiente':
+                    case 'Pendiente de Cotización': return 'fa-clock';
+                    case 'En Proceso': return 'fa-tools';
+                    case 'Cotizado': return 'fa-file-invoice-dollar';
+                    case 'Completado': return 'fa-check-circle';
+                    case 'Cancelado': return 'fa-times-circle';
+                    default: return 'fa-wrench';
+                }
+            };
+
             const getStatusMessage = (estado) => {
                 switch (estado) {
-                    case 'Pendiente': return 'Solicitud enviada. Esperando taller.';
-                    case 'En Proceso': return 'Tu auto estÃ¡ siendo atendido.';
-                    case 'Completado': return 'Â¡Listo! Contacta al taller para recoger tu vehÃ­culo.';
-                    case 'Cancelado': return 'Cita cancelada.';
+                    case 'Pendiente': return 'Solicitud enviada. Esperando confirmación del taller.';
+                    case 'Pendiente de Cotización': return 'El taller está preparando tu cotización.';
+                    case 'Cotizado': return 'Tienes una cotización lista para revisar.';
+                    case 'En Proceso': return 'Tu vehículo está siendo atendido.';
+                    case 'Completado': return '¡Listo! Contacta al taller para recoger tu vehículo.';
+                    case 'Cancelado': return 'Esta cita fue cancelada.';
                     default: return estado;
                 }
             };
 
+            // ===== ORDENAR CITAS según el modo activo =====
+            const ordenarCitas = (citas) => {
+                const arr = [...citas];
+                if (ordenActivo === 'reciente') {
+                    // Más reciente primero
+                    arr.sort((a, b) => new Date(b.fechaHora) - new Date(a.fechaHora));
+                } else if (ordenActivo === 'antiguo') {
+                    // Más antiguo primero
+                    arr.sort((a, b) => new Date(a.fechaHora) - new Date(b.fechaHora));
+                } else if (ordenActivo === 'estado') {
+                    // Pendiente → En Proceso → Completado → Cancelado
+                    // Dentro de cada grupo: más reciente primero
+                    arr.sort((a, b) => {
+                        const pa = prioridadEstado[a.estado] ?? 99;
+                        const pb = prioridadEstado[b.estado] ?? 99;
+                        if (pa !== pb) return pa - pb;
+                        return new Date(b.fechaHora) - new Date(a.fechaHora);
+                    });
+                }
+                return arr;
+            };
+
+            // ===== RENDERIZAR UNA CITA =====
             const renderCita = (cita) => {
                 const card = document.createElement('div');
                 const estadoClass = cita.estado.replace(/\s+/g, '-');
                 card.className = `appointment-card ${estadoClass}`;
-                const fecha = new Date(cita.fechaHora).toLocaleString('es-ES', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 
+                const fecha = new Date(cita.fechaHora).toLocaleString('es-ES', {
+                    day: '2-digit', month: 'long', year: 'numeric',
+                    hour: '2-digit', minute: '2-digit'
+                });
+
+                const iconClass = getStatusIcon(cita.estado);
                 const mensajeEstado = getStatusMessage(cita.estado);
 
                 card.innerHTML = `
-    <i class="fas fa-wrench appointment-icon"></i>
-    <div class="appointment-details">
-        <h3>Cita para ${cita.vehiculoMarca} (${cita.vehiculoPlaca})</h3>
-        <p><strong>Taller:</strong> ${cita.tallerNombre}</p>
-        <p><strong>Fecha:</strong> ${fecha}</p>
-        <p>
-            <strong>Estado:</strong> 
-            <span class="status-badge ${estadoClass}">${cita.estado}</span>
-        </p>
-        <p class="status-message">${mensajeEstado}</p>
-    </div>
-    <a href="detalle_cita.html?id=${cita.idCita}" class="btn">Ver Detalles</a>
-`;
-                citasList.appendChild(card);
+                    <i class="fas ${iconClass} appointment-icon"></i>
+                    <div class="appointment-details">
+                        <h3>${cita.vehiculoMarca} &mdash; <small style="font-weight:400; font-size:0.75em; color:#aaa;">${cita.vehiculoPlaca}</small></h3>
+                        <div class="appointment-meta">
+                            <span class="meta-item"><i class="fas fa-store"></i> ${cita.tallerNombre}</span>
+                            <span class="meta-item"><i class="fas fa-calendar-alt"></i> ${fecha}</span>
+                        </div>
+                        <div style="margin-top:10px;">
+                            <span class="status-badge ${estadoClass}">
+                                <i class="fas ${iconClass}" style="font-size:0.85em;"></i>
+                                ${cita.estado}
+                            </span>
+                            <span style="color:#888; font-size:0.85em; margin-left:8px;">${mensajeEstado}</span>
+                        </div>
+                    </div>
+                    <div class="card-actions">
+                        <a href="detalle_cita.html?id=${cita.idCita}" class="btn" style="white-space:nowrap;">
+                            Ver Detalles <i class="fas fa-arrow-right" style="margin-left:5px;"></i>
+                        </a>
+                    </div>
+                `;
+
+                return card;
             };
 
-            const loadCitas = async () => {
-                citasList.innerHTML = '<p style="color:white; text-align:center;">Cargando tus citas...</p>';
+            // ===== ACTUALIZAR CONTADORES DE FILTROS =====
+            const actualizarContadores = (citas) => {
+                document.getElementById('count-todas').textContent = citas.length;
+                document.getElementById('count-pendiente').textContent = citas.filter(c =>
+                    c.estado === 'Pendiente' || c.estado === 'Pendiente de Cotización' || c.estado === 'Cotizado'
+                ).length;
+                document.getElementById('count-proceso').textContent = citas.filter(c => c.estado === 'En Proceso').length;
+                document.getElementById('count-completado').textContent = citas.filter(c => c.estado === 'Completado').length;
+                document.getElementById('count-cancelado').textContent = citas.filter(c => c.estado === 'Cancelado').length;
+            };
 
-                try {
-                    const res = await fetch('/api/citas');
-                    if (res.status === 401) {
-                        alert('Tu sesiÃ³n ha expirado.');
-                        window.location.href = '../../login_cliente.html';
-                        return;
-                    }
+            // ===== ACTUALIZAR INDICADOR DE ORDEN ACTIVO =====
+            const actualizarIndicadorOrden = () => {
+                const textos = {
+                    reciente: 'Más reciente primero',
+                    antiguo: 'Más antiguo primero',
+                    estado: 'Por estado (Pendiente → Cancelado)'
+                };
+                const iconos = {
+                    reciente: 'fa-sort-amount-down',
+                    antiguo: 'fa-sort-amount-up',
+                    estado: 'fa-layer-group'
+                };
+                const tag = document.getElementById('orderTag');
+                const tagText = document.getElementById('orderTagText');
+                tag.querySelector('i').className = `fas ${iconos[ordenActivo]}`;
+                tagText.textContent = textos[ordenActivo];
+            };
 
-                    if (!res.ok) throw new Error('Error al cargar citas');
+            // ===== APLICAR FILTRO Y MOSTRAR CITAS =====
+            const aplicarFiltro = (filtro) => {
+                filtroActivo = filtro;
+                const citasList = document.getElementById('citasList');
+                const infoDiv = document.getElementById('filterResultsInfo');
 
-                    const citas = await res.json();
-                    citasList.innerHTML = '';
-
-                    if (citas.length === 0) {
-                        citasList.innerHTML = '<p class="no-appointments">AÃºn no tienes citas agendadas.</p>';
-                    } else {
-                        citas.forEach(renderCita);
-                    }
-                } catch (error) {
-                    console.error(error);
-                    citasList.innerHTML = '<p class="no-appointments">Error al cargar tus citas.</p>';
+                // 1. Filtrar por estado
+                let citasFiltradas;
+                if (filtro === 'todas') {
+                    citasFiltradas = [...todasLasCitas];
+                } else if (filtro === 'Pendiente') {
+                    // Pendiente agrupa: Pendiente, Pendiente de Cotización y Cotizado
+                    citasFiltradas = todasLasCitas.filter(c =>
+                        c.estado === 'Pendiente' || c.estado === 'Pendiente de Cotización' || c.estado === 'Cotizado'
+                    );
+                } else {
+                    citasFiltradas = todasLasCitas.filter(c => c.estado === filtro);
                 }
+
+                // 2. Ordenar según el modo activo
+                citasFiltradas = ordenarCitas(citasFiltradas);
+
+                // Info de resultado
+                const filtroNombre = filtro === 'todas' ? 'todas' : filtro;
+                const ordenTexto = {
+                    reciente: 'más recientes primero',
+                    antiguo: 'más antiguas primero',
+                    estado: 'por prioridad de estado'
+                }[ordenActivo];
+                infoDiv.innerHTML = `Mostrando <span>${citasFiltradas.length}</span> cita${citasFiltradas.length !== 1 ? 's' : ''}
+                    ${filtro !== 'todas' ? `con estado <strong style="color:#ccc;">${filtroNombre}</strong>` : 'en total'}
+                    &nbsp;·&nbsp; <i class="fas fa-sort-amount-down" style="color:#666;"></i>
+                    <span style="color:#888;">${ordenTexto}</span>`;
+
+                // Renderizar
+                citasList.innerHTML = '';
+
+                if (citasFiltradas.length === 0) {
+                    const mensajeVacio = filtro === 'todas'
+                        ? 'Aún no tienes citas agendadas.'
+                        : `No tienes citas con estado <strong>${filtroNombre}</strong>.`;
+                    citasList.innerHTML = `
+                        <div class="no-appointments">
+                            <i class="fas fa-calendar-times"></i>
+                            <p>${mensajeVacio}</p>
+                        </div>`;
+                    return;
+                }
+
+                citasFiltradas.forEach((cita, index) => {
+                    const card = renderCita(cita);
+                    card.style.animationDelay = `${index * 0.04}s`;
+                    card.style.opacity = '0';
+                    citasList.appendChild(card);
+                });
             };
 
-            // Cargar citas reales
-            loadCitas();
+            // ===== EVENTOS DE FILTROS DE ESTADO =====
+            const filterBtns = document.querySelectorAll('.filter-btn');
+            filterBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const filtro = btn.dataset.filter;
+
+                    // Quitar todas las clases activas
+                    filterBtns.forEach(b => {
+                        b.classList.remove('active', 'active-pendiente', 'active-proceso', 'active-completado', 'active-cancelado');
+                    });
+
+                    // Aplicar clase correcta según filtro
+                    if (filtro === 'todas') {
+                        btn.classList.add('active');
+                    } else if (filtro === 'Pendiente') {
+                        btn.classList.add('active-pendiente');
+                    } else if (filtro === 'En Proceso') {
+                        btn.classList.add('active-proceso');
+                    } else if (filtro === 'Completado') {
+                        btn.classList.add('active-completado');
+                    } else if (filtro === 'Cancelado') {
+                        btn.classList.add('active-cancelado');
+                    }
+
+                    aplicarFiltro(filtro);
+                });
+            });
+
+            // ===== EVENTOS DE ORDEN =====
+            const sortBtns = document.querySelectorAll('.sort-btn');
+            sortBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const modo = btn.dataset.sort;
+                    ordenActivo = modo;
+
+                    // Actualizar clases activas de orden
+                    sortBtns.forEach(b => b.classList.remove('active-sort'));
+                    btn.classList.add('active-sort');
+
+                    // Actualizar indicador
+                    actualizarIndicadorOrden();
+
+                    // Reaplicar filtro con nuevo orden
+                    aplicarFiltro(filtroActivo);
+                });
+            });
+
+            // ===== CARGAR CITAS DESDE LA API =====
+            const citasList = document.getElementById('citasList');
+            citasList.innerHTML = '<p style="color:white; text-align:center; padding:40px;"><i class="fas fa-spinner fa-spin" style="margin-right:8px;"></i>Cargando tus citas...</p>';
+
+            try {
+                const res = await fetch(API_URL + '/api/citas', {
+                    headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token'), 'Content-Type': 'application/json' },
+                    credentials: 'include'
+                });
+
+                if (res.status === 401) {
+                    alert('Tu sesión ha expirado.');
+                    window.location.href = '../../login_cliente.html';
+                    return;
+                }
+
+                if (!res.ok) throw new Error('Error al cargar citas');
+
+                const citas = await res.json();
+
+                if (citas.length === 0) {
+                    citasList.innerHTML = `
+                        <div class="no-appointments">
+                            <i class="fas fa-calendar-plus"></i>
+                            <p>Aún no tienes citas agendadas.<br>
+                               <a href="buscar_talleres.html" style="color:#f39c12;">¡Agenda tu primera cita!</a>
+                            </p>
+                        </div>`;
+                    actualizarContadores([]);
+                    return;
+                }
+
+                // Guardar todas las citas y actualizar contadores
+                todasLasCitas = citas;
+                actualizarContadores(citas);
+
+                // Mostrar con filtro inicial (todas, más reciente primero)
+                aplicarFiltro('todas');
+
+            } catch (error) {
+                console.error(error);
+                citasList.innerHTML = `
+                    <div class="no-appointments">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <p>Error al cargar tus citas. Intenta recargando la página.</p>
+                    </div>`;
+            }
         });
     </script>
+    <script src="http://localhost:3000/js/global_nav.js"></script>
 </body>
+
+</html>

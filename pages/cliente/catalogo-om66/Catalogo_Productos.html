@@ -5,19 +5,50 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Catálogo de Productos - OM 66 Evolution</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <link rel="stylesheet" href="css/style.css">
+    <!-- SDK de PayPal -->
+    <script
+        src="https://www.paypal.com/sdk/js?client-id=AV3YWOgsecWq7gVh6mebi4LkOetFi1ULwCt0GWcO3AjuvGe86rFVzvEUj3wqcsfJ24480P5_7xanUTZG&currency=MXN"></script>
 </head>
 
 <body>
 
     <header>
-        <div id="cart-icon-container">
-            <span id="cart-icon">🛒</span>
-            <span id="cart-count">0</span>
-        </div>
+        <div
+            style="display: flex; justify-content: space-between; align-items: center; padding: 15px; background-color: #1a1a1a; border-radius: 12px; margin-bottom: 20px;">
+            <div style="display: flex; align-items: center; gap: 20px; flex: 1;">
+                <a href="../dashboard_cliente.html"
+                    style="color: #f39c12; text-decoration: none; font-size: 1.5em; transition: 0.3s;"
+                    title="Volver al Panel">
+                    <i class="fas fa-arrow-left"></i>
+                </a>
+                <a href="../dashboard_cliente.html">
+                    <img src="../../../imagenes/Logo_Autoguest.png" alt="Logo AutoGuest" width="110"
+                        style="cursor: pointer;">
+                </a>
+            </div>
 
-        <h1>Catálogo de Productos OM<sup>66</sup> Evolution</h1>
-        <p>Calidad y rendimiento para tu vehículo.</p>
+            <div style="flex: 2; text-align: center;">
+                <h1 style="margin: 0; font-size: 2.2em; font-weight: 800; line-height: 1.2;">Catálogo de Productos
+                    OM<sup>66</sup> Evolution</h1>
+                <p style="margin: 5px 0 0; font-size: 1.1em; opacity: 0.9;">Calidad y rendimiento para tu vehículo.</p>
+            </div>
+
+            <div style="flex: 1; display: flex; justify-content: flex-end; align-items: center; gap: 20px;">
+                <a href="../dashboard_cliente.html"
+                    style="color: #f39c12; text-decoration: none; font-size: 1.5em; transition: 0.3s;"
+                    title="Ir al Dashboard">
+                    <i class="fas fa-home"></i>
+                </a>
+                <div id="cart-icon-container"
+                    style="position: relative; margin-right: 15px; font-size: 2em; cursor: pointer; color: #6fbf40; top: 0; right: 0; display: flex; align-items: center;">
+                    <span id="cart-icon">🛒</span>
+                    <span id="cart-count"
+                        style="position: absolute; top: -5px; right: -5px; background-color: #e74c3c; color: white; font-size: 0.5em; padding: 3px 6px; border-radius: 50%; line-height: 1;">0</span>
+                </div>
+            </div>
+        </div>
     </header>
 
     <main class="productos-container">
@@ -45,43 +76,18 @@
 
     <!-- Modal de Pago -->
     <div id="payment-modal" class="modal">
-        <div class="modal-content" style="max-width: 500px;">
+        <div class="modal-content" style="max-width: 500px; text-align: center;">
             <span class="close-button-payment"
                 style="color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer;">&times;</span>
-            <h2>Datos de Pago</h2>
-            <p style="margin-bottom: 20px;">Ingresa los datos de tu tarjeta para finalizar la compra.</p>
+            <h2>Procesar Pago</h2>
+            <p style="margin-bottom: 20px;">seleccione forma de pago:</p>
 
-            <form id="payment-form">
-                <label for="card-name">Nombre en la Tarjeta:</label>
-                <input type="text" id="card-name" required placeholder="Juan Pérez"
-                    style="width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 4px;">
+            <div style="margin-bottom: 20px; font-size: 1.1em;">
+                <p><strong>Total a Pagar:</strong> $<span id="payment-total">0.00</span></p>
+            </div>
 
-                <label for="card-number">Número de Tarjeta:</label>
-                <input type="text" id="card-number" required placeholder="0000 0000 0000 0000" maxlength="19"
-                    style="width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 4px;">
-
-                <div style="display: flex; gap: 10px;">
-                    <div style="flex: 1;">
-                        <label for="card-expiry">Expiración (MM/YY):</label>
-                        <input type="text" id="card-expiry" required placeholder="MM/YY" maxlength="5"
-                            style="width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 4px;">
-                    </div>
-                    <div style="flex: 1;">
-                        <label for="card-cvv">CVV:</label>
-                        <input type="password" id="card-cvv" required placeholder="123" maxlength="3"
-                            style="width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 4px;">
-                    </div>
-                </div>
-
-                <div
-                    style="background-color: #f9f9f9; padding: 10px; border-radius: 4px; margin-bottom: 20px; font-size: 0.9em; color: #555;">
-                    <p><strong>Total a Pagar:</strong> $<span id="payment-total">0.00</span></p>
-                </div>
-
-                <button type="submit"
-                    style="width: 100%; padding: 12px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px;">Pagar
-                    y Finalizar</button>
-            </form>
+            <!-- Contenedor del Botón de PayPal -->
+            <div id="paypal-button-container" style="margin-top: 20px;"></div>
         </div>
     </div>
     <div id="restock-modal" class="modal">
@@ -113,6 +119,8 @@
 
     <script src="js/cart.js"></script>
     <script>
+        const API_URL = 'http://localhost:3000';
+
         document.addEventListener('DOMContentLoaded', async () => {
             const productosContainer = document.querySelector('.productos-container');
             const restockModal = document.getElementById('restock-modal');
@@ -129,7 +137,13 @@
 
             async function loadProducts() {
                 try {
-                    const response = await fetch('/api/inventario');
+                    const response = await fetch(`${API_URL}/api/inventario`, {
+                        headers: {
+                            'Authorization': 'Bearer ' + localStorage.getItem('token'),
+                            'Content-Type': 'application/json'
+                        },
+                        credentials: 'include'
+                    });
                     const products = await response.json();
 
                     productosContainer.innerHTML = ''; // Clear existing content
@@ -146,14 +160,16 @@
                         const isSoldOut = product.stock <= 0;
                         const stockColor = isSoldOut ? 'red' : 'green';
                         const stockText = isSoldOut ? 'AGOTADO' : `Stock: ${product.stock}`;
-
                         const buttonText = isSoldOut ? 'Reabastecer (Taller)' : 'Agregar al Carrito';
                         // If sold out, button is enabled but triggers restock. If has stock, triggers add to cart.
                         const buttonClass = isSoldOut ? 'restock-btn' : 'add-to-cart';
                         const buttonStyle = isSoldOut ? 'background-color: #ff9800;' : '';
 
+                        // Default image replacement
+                        const imgSrc = product.imagen || 'https://images.unsplash.com/photo-1615554865039-b9d9fac2dfdb?w=400&h=300&fit=crop';
+
                         card.innerHTML = `
-                            <img src="${product.imagen || 'img/default.jpg'}" alt="${product.nombre}">
+                            <img src="${imgSrc}" alt="${product.nombre}" style="width:100%; height:200px; object-fit:cover;">
                             <h2>${product.nombre}</h2>
                             <p>${product.descripcion}</p>
                             <div class="precio">
@@ -207,9 +223,13 @@
                 const cantidad = document.getElementById('restock-quantity').value;
 
                 try {
-                    const response = await fetch(`/api/inventario/${id}/restock`, {
+                    const response = await fetch(`${API_URL}/api/inventario/${id}/restock`, {
                         method: 'PUT',
-                        headers: { 'Content-Type': 'application/json' },
+                        headers: {
+                            'Authorization': 'Bearer ' + localStorage.getItem('token'),
+                            'Content-Type': 'application/json'
+                        },
+                        credentials: 'include',
                         body: JSON.stringify({ email, password, cantidad: parseInt(cantidad) })
                     });
 

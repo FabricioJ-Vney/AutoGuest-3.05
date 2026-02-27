@@ -97,6 +97,10 @@ function mostrarCitas(citas) {
                         <i class="fas fa-save"></i>
                     </button>
                     <button class="btn" onclick="verDetalles('${cita.idCita}')" style="padding: 8px 12px; font-size: 14px;">Detalles</button>
+                    <!-- BOTÓN VER CHAT (Taller) -->
+                    <button class="btn" onclick="abrirChatAdmin('${cita.idCita}', '${cita.clienteNombre}')" style="padding: 8px 12px; font-size: 14px; background-color: #3498db; margin-left: 5px;">
+                        <i class="fas fa-comments"></i> Chat
+                    </button>
                     ${(cita.estado !== 'Completado' && cita.estado !== 'Cancelado' && cita.estado !== 'Entregado') ?
                 `<button class="btn-completar" onclick="completarCita('${cita.idCita}')" style="background-color: #2ecc71; margin-left: 5px;" title="Completar">
                             <i class="fas fa-check"></i>

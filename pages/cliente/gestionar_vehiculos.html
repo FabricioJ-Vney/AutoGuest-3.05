@@ -312,20 +312,10 @@
 
 <body>
 
-    <header class="dashboard-header">
-        <div class="header-left">
-            <a href="dashboard_cliente.html">
-                <img src="../../imagenes/Logo_Autoguest.png" alt="Logo de AutoGuest" class="logo">
-            </a>
-            <a href="dashboard_cliente.html" class="back-to-dashboard">
-                <i class="fas fa-arrow-left"></i>
-                <span>Volver al Panel</span>
-            </a>
-        </div>
-        <div class="header-right">
-            <div class="user-greeting">¡Hola, [Nombre del Cliente]!</div>
-            <a href="../../index.html" class="logout-btn">Cerrar Sesión</a>
-        </div>
+    <header class="simple-header" style="background: #2c2c2c; padding: 15px 40px; border-bottom: 1px solid #333;">
+        <a href="dashboard_cliente.html">
+            <img src="../../imagenes/Logo_Autoguest.png" alt="Logo de AutoGuest" class="logo" style="height: 90px;">
+        </a>
     </header>
 
     <main class="page-container">
@@ -383,6 +373,7 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            const API_URL = 'http://localhost:3000';
             // --- INICIO: Guardián de Autenticación y Personalización ---
             if (sessionStorage.getItem('isLoggedIn') !== 'true') {
                 alert('Tu sesión ha expirado. Por favor, inicia sesión de nuevo.');
@@ -392,7 +383,7 @@
 
             const userName = sessionStorage.getItem('userName');
             if (userName) {
-                document.querySelector('.header-right .user-greeting').textContent = `¡Hola, ${userName}!`;
+                let ug = document.querySelector('.header-right .user-greeting'); if(ug) { ug.textContent = `¡Hola, ${userName}!`; }
             }
 
             const logoutBtn = document.querySelector('.logout-btn');
@@ -485,8 +476,13 @@
                         return;
                     }
                     try {
-                        const response = await fetch(`/api/vehiculos/${vehicle.idVehiculo}`, {
-                            method: 'DELETE'
+                        const response = await fetch(`${API_URL}/api/vehiculos/${vehicle.idVehiculo}`, {
+                            method: 'DELETE',
+                            headers: { 
+                                'Authorization': 'Bearer ' + localStorage.getItem('token'), 
+                                'Content-Type': 'application/json' 
+                            }, 
+                            credentials: 'include'
                         });
 
                         if (response.ok) {
@@ -514,7 +510,11 @@
                 });
 
                 try {
-                    const response = await fetch('/api/vehiculos');
+                    const response = await fetch('http://localhost:3000/api/vehiculos', { headers: { 
+                                'Authorization': 'Bearer ' + localStorage.getItem('token'), 
+                                'Content-Type': 'application/json' 
+                            }, 
+                            credentials: 'include' });
                     if (response.status === 401) {
                         // Sesión expirada o no válida
                         alert('Tu sesión ha expirado. Por favor, inicia sesión de nuevo.');
@@ -561,8 +561,13 @@
                         method = 'PUT';
                     }
 
-                    const response = await fetch(url, {
+                    const response = await fetch(`http://localhost:3000${url}`, {
                         method: method,
+                        headers: { 
+                                'Authorization': 'Bearer ' + localStorage.getItem('token'), 
+                                'Content-Type': 'application/json' 
+                            }, 
+                            credentials: 'include',
                         headers: {
                             'Content-Type': 'application/json'
                         },
@@ -593,6 +598,8 @@
             loadVehicles();
         });
     </script>
+
+    <script src="http://localhost:3000/js/global_nav.js"></script>
 </body>
 
 </html>

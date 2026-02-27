@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirmación de Pago - AutoGuest</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="../../style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        .container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+            background-color: #2c2c2c;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            color: #ffffff;
+            text-align: center;
+        }
+
+        .success-icon {
+            font-size: 80px;
+            color: #2ecc71;
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            margin-bottom: 10px;
+            color: #f39c12;
+        }
+
+        .ticket-box {
+            background-color: #f9f9f9;
+            color: #333;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            text-align: left;
+            position: relative;
+        }
+
+        .ticket-box h3 {
+            color: #f39c12;
+            text-align: center;
+            margin-bottom: 20px;
+            border-bottom: 1px dashed #ccc;
+            padding-bottom: 10px;
+        }
+
+        .ticket-info p {
+            margin: 5px 0;
+            font-size: 0.95em;
+        }
+
+        table.ticket-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        table.ticket-table th,
+        table.ticket-table td {
+            padding: 10px;
+            border-bottom: 1px solid #ccc;
+            text-align: left;
+        }
+
+        .total-row {
+            font-weight: bold;
+            font-size: 1.2em;
+            color: #2c3e50;
+        }
+
+        .buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.3s;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: #f39c12;
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background: #d68910;
+        }
+
+        .btn-secondary {
+            background: #444;
+            color: #fff;
+        }
+
+        .btn-secondary:hover {
+            background: #555;
+        }
+
+        .btn-success {
+            background: #27ae60;
+            color: #fff;
+        }
+
+        .btn-success:hover {
+            background: #219150;
+        }
+
+        @media (max-width: 600px) {
+            .buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header class="dashboard-header"
+        style="padding: 15px 25px; background-color: #1a1a1a; display: flex; justify-content: space-between; align-items: center;">
+        <div class="header-left" style="display: flex; align-items: center; gap: 20px;">
+            <a href="historial_cliente.html"
+                style="color: #f39c12; text-decoration: none; font-size: 20px; display: flex; align-items: center;">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+            <a href="historial_cliente.html"><img src="../../imagenes/Logo_Autoguest.png" alt="Logo de AutoGuest"
+                    width="110"></a>
+        </div>
+        <div class="header-right">
+            <a href="dashboard_cliente.html" style="color: #f39c12; font-size: 24px; text-decoration: none;">
+                <i class="fas fa-home"></i>
+            </a>
+        </div>
+    </header>
+
+    <div class="container" id="ticket-container">
+        <i class="fas fa-check-circle success-icon"></i>
+        <h2>¡Pago Confirmado!</h2>
+        <p>Tu transacción ha sido procesada exitosamente.</p>
+
+        <div class="ticket-box" id="printable-ticket">
+            <h3>Comprobante de Pago AutoGuest</h3>
+            <div class="ticket-info">
+                <p><strong>Nº de Ticket:</strong> <span id="lblIdTicket">Cargando...</span></p>
+                <p><strong>Estado:</strong> <span id="lblEstado">Cargando...</span></p>
+                <p><strong>Tipo de Operación:</strong> <span id="lblTipo">Cargando...</span></p>
+                <p><strong>Establecimiento:</strong> <span id="lblTaller">Cargando...</span></p>
+                <p><strong>Fecha:</strong> <span id="lblFecha">Cargando...</span></p>
+            </div>
+
+            <table class="ticket-table">
+                <thead>
+                    <tr>
+                        <th>Descripción</th>
+                        <th>Cant</th>
+                        <th>Precio</th>
+                        <th>Subtotal</th>
+                    </tr>
+                </thead>
+                <tbody id="ticket-items">
+                    <!-- Items -->
+                </tbody>
+                <tfoot>
+                    <tr class="total-row">
+                        <td colspan="3" style="text-align: right;">Total Pagado:</td>
+                        <td id="lblTotal">$0.00</td>
+                    </tr>
+                </tfoot>
+            </table>
+
+            <div
+                style="text-align: center; margin-top: 20px; font-weight: bold; color: #f39c12; border-top: 1px dashed #ccc; padding-top: 15px;">
+                <p>¡Muchas gracias por su preferencia en AutoGuest!</p>
+            </div>
+        </div>
+
+        <div class="buttons">
+            <button class="btn btn-success" onclick="downloadPDF()"><i class="fas fa-file-pdf"></i> Imprimir</button>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:3000'; // Asegurar que apunte al backend
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const idTicket = urlParams.get('idTicket') || urlParams.get('ticket');
+
+            if (!idTicket) {
+                alert("No se encontró ID de ticket válido");
+                return;
+            }
+
+            document.getElementById('lblIdTicket').innerText = idTicket;
+
+            try {
+                const res = await fetch(`${API_URL}/api/tickets/detalle/${idTicket}`, {
+                    headers: {
+                        'Authorization': 'Bearer ' + localStorage.getItem('token'),
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include'
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    document.getElementById('lblEstado').innerText = data.ticket.estado;
+                    document.getElementById('lblTipo').innerText = data.tipo;
+                    document.getElementById('lblTaller').innerText = data.taller || 'No especificado';
+                    document.getElementById('lblFecha').innerText = data.fecha || 'No disponible';
+
+                    const tbody = document.getElementById('ticket-items');
+                    tbody.innerHTML = '';
+
+                    data.items.forEach(item => {
+                        tbody.innerHTML += `
+                            <tr>
+                                <td>${item.descripcion}</td>
+                                <td>${item.cantidad}</td>
+                                <td>$${item.precio.toFixed(2)}</td>
+                                <td>$${item.subtotal.toFixed(2)}</td>
+                            </tr>
+                        `;
+                    });
+
+                    document.getElementById('lblTotal').innerText = `$${data.total.toFixed(2)} ${data.moneda}`;
+                } else {
+                    document.getElementById('ticket-items').innerHTML = `<tr><td colspan="4" style="text-align:center;">No se pudieron cargar los detalles del recibo.</td></tr>`;
+                }
+            } catch (err) {
+                console.error("Error detallando ticket", err);
+            }
+        });
+
+        function downloadPDF() {
+            var element = document.getElementById('printable-ticket');
+            var opt = {
+                margin: 1,
+                filename: 'Comprobante_Pago_' + document.getElementById('lblIdTicket').innerText + '.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2 },
+                jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+            };
+
+            // Promise-based API for generating PDF
+            html2pdf().set(opt).from(element).save();
+        }
+    </script>
+</body>
+
+</html>

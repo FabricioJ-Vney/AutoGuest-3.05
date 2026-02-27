@@ -8,8 +8,13 @@ const router = express.Router();
 router.post('/', async (req, res) => {
     const { items, metodoPago } = req.body;
 
-    // Obtener usuario de la sesión o null
-    const idCliente = req.session.userId || null;
+    // Obtener usuario de la sesión o cliente general
+    let idCliente = req.session.userId || 'CLI02';
+
+    // Si el usuario en sesión no es un cliente (ej. Mecánico), usar el genérico para evitar error de Foreign Key
+    if (!idCliente.startsWith('CLI')) {
+        idCliente = 'CLI02';
+    }
 
     if (!items || items.length === 0) {
         return res.status(400).json({ mensaje: 'El carrito está vacío.' });
@@ -62,8 +67,18 @@ router.post('/', async (req, res) => {
             );
         }
 
+        // Crear ticket de soporte
+        let idTicket = null;
+        if (estadoPago === 'PAGADO') {
+            idTicket = 'TK-PAY-' + nanoid(6);
+            await connection.query(
+                'INSERT INTO ticketsoporte (idTicket, asunto, estado, idCliente, idPedido) VALUES (?, ?, ?, ?, ?)',
+                [idTicket, `Comprobante de Pago Pedido: ${idPedido}`, 'Cerrado', idCliente, idPedido]
+            );
+        }
+
         await connection.commit();
-        res.status(201).json({ mensaje: 'Pedido creado con éxito', idPedido });
+        res.status(201).json({ mensaje: 'Pedido creado con éxito', idPedido, idTicket });
 
     } catch (error) {
         if (connection) await connection.rollback();

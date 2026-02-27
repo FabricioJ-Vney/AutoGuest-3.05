@@ -279,20 +279,10 @@
 
 <body>
 
-    <header class="dashboard-header">
-        <div class="header-left">
-            <a href="dashboard_cliente.html">
-                <img src="../../imagenes/Logo_Autoguest.png" alt="Logo de AutoGuest" class="logo">
-            </a>
-            <a href="dashboard_cliente.html" class="back-to-dashboard">
-                <i class="fas fa-arrow-left"></i>
-                <span>Volver al Panel</span>
-            </a>
-        </div>
-        <div class="header-right">
-            <div class="user-greeting">¡Hola, [Nombre]!</div>
-            <a href="../../index.html" class="logout-btn">Cerrar Sesión</a>
-        </div>
+    <header class="simple-header" style="background: #2c2c2c; padding: 15px 40px; border-bottom: 1px solid #333;">
+        <a href="dashboard_cliente.html">
+            <img src="../../imagenes/Logo_Autoguest.png" alt="Logo de AutoGuest" class="logo" style="height: 90px;">
+        </a>
     </header>
 
     <main class="profile-container">
@@ -361,8 +351,9 @@
             </form>
 
             <div class="btn-group" style="margin-top: 40px; border-top: 1px solid #555; padding-top: 20px;">
-                <button type="button" class="btn btn-secondary" onclick="window.location.href='dashboard_cliente.html'">
-                    Volver al Panel
+                <button type="button" class="btn btn-secondary" onclick="window.location.href='dashboard_cliente.html'"
+                    title="Volver al Panel">
+                    <i class="fas fa-arrow-left" style="font-size: 1.2em;"></i>
                 </button>
             </div>
         </div>
@@ -380,7 +371,7 @@
             // Actualizar saludo
             const userName = sessionStorage.getItem('userName');
             if (userName) {
-                document.querySelector('.user-greeting').textContent = `¡Hola, ${userName}!`;
+                let ug2 = document.querySelector('.user-greeting'); if(ug2) { ug2.textContent = `¡Hola, ${userName}!`; }
             }
 
             // Configurar logout
@@ -480,7 +471,7 @@
                 // Actualizar sessionStorage
                 if (result.usuario) {
                     sessionStorage.setItem('userName', result.usuario.nombre);
-                    document.querySelector('.user-greeting').textContent = `¡Hola, ${result.usuario.nombre}!`;
+                    let ug2 = document.querySelector('.user-greeting'); if(ug2) { ug2.textContent = `¡Hola, ${result.usuario.nombre}!`; }
                 }
 
                 showAlert('Datos personales actualizados con éxito', 'success');
@@ -601,6 +592,8 @@
             }, 5000);
         }
     </script>
+
+    <script src="http://localhost:3000/js/global_nav.js"></script>
 </body>
 
 </html>

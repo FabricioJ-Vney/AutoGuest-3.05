@@ -40,13 +40,23 @@ router.post('/registro', async (req, res) => {
             [idUsuario, nombre, email, password, telefono]
         );
 
-        // 5. Guardar en tabla MECANICO con la ESPECIALIDAD
+        // 5. Guardar en tabla MECANICO con la ESPECIALIDAD (y estado PENDIENTE por defecto)
         await db.query(
-            'INSERT INTO mecanico (idUsuario, idTaller, especialidad) VALUES (?, ?, ?)',
-            [idUsuario, idTaller, especialidad] // <--- Aquí usamos el dato real
+            'INSERT INTO mecanico (idUsuario, idTaller, especialidad, estado_solicitud) VALUES (?, ?, ?, ?)',
+            [idUsuario, idTaller, especialidad, 'PENDIENTE']
         );
 
-        res.status(201).json({ success: true, mensaje: 'Mecánico registrado exitosamente.' });
+        // 6. Notificar al administrador del taller
+        const [admins] = await db.query('SELECT idUsuario FROM administrador WHERE idTaller = ?', [idTaller]);
+        if (admins.length > 0) {
+            const idAdminTaller = admins[0].idUsuario;
+            await db.query(
+                'INSERT INTO notificacion (idUsuario, titulo, mensaje) VALUES (?, ?, ?)',
+                [idAdminTaller, 'Nueva Solicitud de Mecánico', 'El mecánico ' + nombre + ' ha solicitado unirse a tu taller. Ve a Gestionar Mecánicos para aprobar o rechazar su solicitud.']
+            );
+        }
+
+        res.status(201).json({ success: true, mensaje: 'Mecánico registrado. Esperando aprobación del taller.' });
 
     } catch (error) {
         console.error(error);
@@ -68,6 +78,11 @@ router.post('/login', async (req, res) => {
 
         const [mecanico] = await db.query('SELECT * FROM mecanico WHERE idUsuario = ?', [user.idUsuario]);
         if (mecanico.length === 0) return res.status(403).json({ mensaje: 'No tienes cuenta de mecánico.' });
+
+        // Verificamos si fue aprobado por el taller
+        if (mecanico[0].estado_solicitud !== 'APROBADO') {
+            return res.status(403).json({ mensaje: 'Tu cuenta aún no ha sido aprobada por el taller.' });
+        }
 
         req.session.userId = user.idUsuario;
         req.session.role = 'mecanico';
@@ -218,6 +233,16 @@ router.post('/cotizar', async (req, res) => {
 
         // 4. Actualizar estado de la cita
         await connection.query('UPDATE cita SET estado = ? WHERE idCita = ?', ['Cotizado', idCita]);
+
+        // 5. Notificar al cliente
+        const [citaRow] = await connection.query('SELECT idCliente FROM cita WHERE idCita = ?', [idCita]);
+        if (citaRow.length > 0) {
+            const idCliente = citaRow[0].idCliente;
+            await connection.query(
+                'INSERT INTO notificacion (idUsuario, titulo, mensaje) VALUES (?, ?, ?)',
+                [idCliente, '¡Nueva Cotización Recibida!', 'El mecánico ha enviado una cotización para tu cita ' + idCita + '. Revísala para continuar.']
+            );
+        }
 
         await connection.commit();
         res.json({ success: true, mensaje: 'Cotización enviada al cliente.' });

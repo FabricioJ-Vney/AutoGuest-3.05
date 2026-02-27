@@ -322,6 +322,27 @@
     </div>
 
     <script src="citas-admin.js"></script>
+    <script src="http://localhost:3000/js/global_nav.js"></script>
+
+
+    <!-- Modal de Chat (Taller - Solo Lectura) -->
+    <div class="modal-overlay" id="chatModal">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h2>Chat con Cliente (Solo Lectura)</h2>
+                <button class="close-btn" id="closeChatModalBtn">&times;</button>
+            </div>
+            <div id="chatMessages" style="height: 300px; overflow-y: auto; background: #1a1a1a; padding: 15px; border-radius: 8px; margin-bottom: 20px; display: flex; flex-direction: column; gap: 10px;">
+                <!-- Messages go here -->
+                <p style="color:#aaa; text-align:center;">Cargando mensajes...</p>
+            </div>
+            <div style="background: rgba(243, 156, 18, 0.1); padding: 10px; border-radius: 5px; border-left: 3px solid #f39c12; color: #f0f0f0; font-size: 0.9em;">
+                <i class="fas fa-info-circle" style="color: #f39c12; margin-right: 5px;"></i>
+                Como administrador del taller, solo puedes supervisar esta conversación.
+            </div>
+        </div>
+    </div>
+
 </body>
 
 </html>

@@ -5,7 +5,8 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log('Profile link integration loaded');
 
     // Buscar el contenedor de tarjetas del dashboard
-    const dashboardGrid = document.querySelector('.dashboard-grid') ||
+    const dashboardGrid = document.querySelector('.dashboard-content') ||
+        document.querySelector('.dashboard-grid') ||
         document.querySelector('.cards-container') ||
         document.querySelector('.dashboard-cards');
 

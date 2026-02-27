@@ -256,6 +256,15 @@ router.put('/:id/aprobar-cotizacion', isAuthenticated, async (req, res) => {
             // Asumimos que al aprobar se acepta el compromiso de pago, aunque el pago real es al final o anticipado.
             // Por ahora solo cambiamos el estado de la cita que es lo que mueve el flujo.
 
+            // Notificar al mecánico
+            const [mecanicoRow] = await connection.query('SELECT idMecanico FROM cita WHERE idCita = ?', [id]);
+            if (mecanicoRow.length > 0 && mecanicoRow[0].idMecanico) {
+                await connection.query(
+                    'INSERT INTO notificacion (idUsuario, titulo, mensaje) VALUES (?, ?, ?)',
+                    [mecanicoRow[0].idMecanico, '¡Cotización Aprobada!', 'El cliente ha aceptado la cotización de la cita ' + id + '. Puedes iniciar el servicio.']
+                );
+            }
+
             await connection.commit();
             res.json({ success: true, message: 'Cotización aprobada. El mecánico comenzará el trabajo pronto.' });
 
@@ -289,6 +298,14 @@ router.put('/:id/rechazar-cotizacion', isAuthenticated, async (req, res) => {
         // Update to 'Cancelado'
         await db.query('UPDATE cita SET estado = ? WHERE idCita = ?', ['Cancelado', id]);
 
+        // Notificar al mecánico
+        if (cita[0].idMecanico) {
+            await db.query(
+                'INSERT INTO notificacion (idUsuario, titulo, mensaje) VALUES (?, ?, ?)',
+                [cita[0].idMecanico, 'Cotización Rechazada', 'El cliente ha rechazado la cotización de la cita ' + id + ' y ha sido cancelada.']
+            );
+        }
+
         res.json({ success: true, message: 'Cotización rechazada. La cita ha sido cancelada.' });
 
     } catch (error) {
@@ -319,7 +336,7 @@ router.get('/:id/cotizacion', isAuthenticated, async (req, res) => {
             FROM cotizacion_servicios cs
             JOIN servicio s ON cs.idServicio = s.idServicio
             WHERE cs.idCotizacion = ?
-        `, [cot.idCotizacion]);
+                        `, [cot.idCotizacion]);
 
         res.json({
             idCotizacion: cot.idCotizacion,

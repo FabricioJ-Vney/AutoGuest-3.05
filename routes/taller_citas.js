@@ -41,6 +41,7 @@ router.get('/citas-hoy', isAuthenticated, async (req, res) => {
             LEFT JOIN mecanico mec ON c.idMecanico = mec.idUsuario
             LEFT JOIN usuario m ON mec.idUsuario = m.idUsuario
             WHERE c.idTaller = ?
+              AND c.estado = 'En Proceso'
               AND DATE(c.fechaHora) = CURDATE()
             ORDER BY c.fechaHora ASC
         `, [idTaller]);

@@ -73,6 +73,7 @@ function addItemToCart(id, name, price, currentStock) {
     if (existingItem) {
         if (existingItem.quantity < currentStock) {
             existingItem.quantity++;
+            existingItem.maxStock = currentStock; // Actualizamos o guardamos stock máximo conocido
             saveCartToLocalStorage(); // Guardar cambios
             updateCartCount();
             alert(`"${name}" agregado al carrito. Cantidad actual: ${existingItem.quantity}`);
@@ -81,7 +82,7 @@ function addItemToCart(id, name, price, currentStock) {
         }
     } else {
         if (currentStock > 0) {
-            cart.push({ id, name, price, quantity: 1 });
+            cart.push({ id, name, price, quantity: 1, maxStock: currentStock });
             saveCartToLocalStorage(); // Guardar cambios
             updateCartCount();
             alert(`"${name}" agregado al carrito.`);
@@ -89,14 +90,6 @@ function addItemToCart(id, name, price, currentStock) {
             alert(`"${name}" está agotado y no se puede agregar al carrito.`);
         }
     }
-}
-
-/**
- * Actualiza el número de productos en el ícono del carrito.
- */
-function updateCartCount() {
-    const totalCount = cart.reduce((total, item) => total + item.quantity, 0);
-    cartCount.textContent = totalCount;
 }
 
 /**
@@ -111,18 +104,70 @@ function renderCart() {
     } else {
         cart.forEach(item => {
             const li = document.createElement('li');
+            li.style.display = 'flex';
+            li.style.justifyContent = 'space-between';
+            li.style.alignItems = 'center';
+            li.style.marginBottom = '10px';
+            li.style.borderBottom = '1px solid #eee';
+            li.style.paddingBottom = '10px';
+
             const subtotal = item.price * item.quantity;
             total += subtotal;
 
             li.innerHTML = `
-                <span>${item.name} (x${item.quantity})</span>
-                <span>$${subtotal.toFixed(2)}</span>
+                <div style="flex: 2; text-align: left; padding-right: 10px;">
+                    <span style="font-weight: 500;">${item.name}</span>
+                </div>
+                <div style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                    <button onclick="decreaseCartQuantity('${item.id}')" style="padding: 2px 8px; border-radius: 4px; border: 1px solid #ccc; background: #f9f9f9; cursor: pointer;">-</button>
+                    <span style="min-width: 20px; text-align: center;">${item.quantity}</span>
+                    <button onclick="increaseCartQuantity('${item.id}')" style="padding: 2px 8px; border-radius: 4px; border: 1px solid #ccc; background: #f9f9f9; cursor: pointer;">+</button>
+                </div>
+                <div style="flex: 1; text-align: right; font-weight: bold;">
+                    <span>$${subtotal.toFixed(2)}</span>
+                </div>
             `;
             cartItemsContainer.appendChild(li);
         });
     }
 
     cartTotalElement.textContent = total.toFixed(2);
+}
+
+// Funciones globales expuestas para los botones +/-
+window.increaseCartQuantity = function (id) {
+    const item = cart.find(i => i.id === id);
+    if (item) {
+        if (item.maxStock && item.quantity >= item.maxStock) {
+            alert(`No hay más stock disponible para "${item.name}".`);
+            return;
+        }
+        item.quantity++;
+        saveCartToLocalStorage();
+        updateCartCount();
+        renderCart();
+    }
+};
+
+window.decreaseCartQuantity = function (id) {
+    const index = cart.findIndex(i => i.id === id);
+    if (index > -1) {
+        cart[index].quantity--;
+        if (cart[index].quantity <= 0) {
+            cart.splice(index, 1);
+        }
+        saveCartToLocalStorage();
+        updateCartCount();
+        renderCart();
+    }
+};
+
+/**
+ * Actualiza el número de productos en el ícono del carrito.
+ */
+function updateCartCount() {
+    const totalCount = cart.reduce((total, item) => total + item.quantity, 0);
+    cartCount.textContent = totalCount;
 }
 
 /**
@@ -134,7 +179,6 @@ function renderCart() {
 // Elementos del Modal de Pago
 const paymentModal = document.getElementById('payment-modal');
 const closePaymentButton = document.querySelector('.close-button-payment');
-const paymentForm = document.getElementById('payment-form');
 const paymentTotalElement = document.getElementById('payment-total');
 
 // Abrir modal de pago al hacer click en "Proceder al Pago"
@@ -151,6 +195,76 @@ checkoutButton.addEventListener('click', () => {
     // Cerrar modal del carrito y abrir modal de pago
     modal.style.display = 'none';
     paymentModal.style.display = 'block';
+
+    const container = document.getElementById('paypal-button-container');
+    container.innerHTML = '';
+
+    paypal.Buttons({
+        createOrder: function (data, actions) {
+            return actions.order.create({
+                purchase_units: [{
+                    amount: {
+                        value: total.toFixed(2)
+                    }
+                }]
+            });
+        },
+        onApprove: function (data, actions) {
+            return actions.order.capture().then(async function (details) {
+                // Preparar items para la API
+                const apiItems = cart.map(item => ({
+                    idItemInventario: item.id,
+                    cantidad: item.quantity
+                }));
+
+                try {
+                    const baseUrl = typeof API_URL !== 'undefined' ? API_URL : '';
+                    const response = await fetch(`${baseUrl}/api/pedidos`, {
+                        method: 'POST',
+                        credentials: 'include',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            items: apiItems,
+                            metodoPago: 'PayPal',
+                            detallesPago: {
+                                titular: details.payer.name.given_name,
+                                ultimosDigitos: data.orderID
+                            }
+                        })
+                    });
+
+                    const result = await response.json();
+
+                    if (!response.ok) {
+                        throw new Error(result.mensaje || 'Error al procesar el pedido.');
+                    }
+
+                    // Limpiar carrito
+                    cart = [];
+                    saveCartToLocalStorage();
+                    updateCartCount();
+                    renderCart();
+
+                    paymentModal.style.display = 'none';
+
+                    // Redirigir a ticket de confirmación
+                    if (result.idTicket) {
+                        window.location.href = `../ticket_confirmacion.html?idTicket=${result.idTicket}`;
+                    } else {
+                        window.open(`${baseUrl}/api/pedidos/${result.idPedido}/ticket`, '_blank');
+                        location.reload();
+                    }
+
+                } catch (error) {
+                    console.error('Error:', error);
+                    // Provide a non-blocking error display inside the modal instead of alert
+                    paymentTotalElement.innerHTML = `<span style="color:red; font-size:14px;">Error al procesar: ${error.message}</span>`;
+                }
+            });
+        }
+    }).render('#paypal-button-container');
 });
 
 // Cerrar modal de pago
@@ -168,82 +282,6 @@ window.addEventListener('click', (event) => {
     }
 });
 
-// Manejar envío del formulario de pago
-paymentForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-
-    // Simulación de procesamiento de pago
-    const cardName = document.getElementById('card-name').value;
-    const cardNumber = document.getElementById('card-number').value;
-
-    if (cardNumber.length < 16) {
-        alert('Por favor, ingresa un número de tarjeta válido.');
-        return;
-    }
-
-    // Mostrar indicador de carga (opcional)
-    const submitBtn = paymentForm.querySelector('button[type="submit"]');
-    const originalBtnText = submitBtn.textContent;
-    submitBtn.textContent = 'Procesando pago...';
-    submitBtn.disabled = true;
-
-    // Simular retardo de red
-    await new Promise(resolve => setTimeout(resolve, 1500));
-
-    // Preparar items para la API
-    const apiItems = cart.map(item => ({
-        idItemInventario: item.id,
-        cantidad: item.quantity
-    }));
-
-    try {
-        // Enviar pedido al backend
-        const response = await fetch('/api/pedidos', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                items: apiItems,
-                metodoPago: 'Tarjeta',
-                detallesPago: {
-                    titular: cardName,
-                    ultimosDigitos: cardNumber.slice(-4)
-                }
-            })
-        });
-
-        const result = await response.json();
-
-        if (!response.ok) {
-            throw new Error(result.mensaje || 'Error al procesar el pedido.');
-        }
-
-        alert('¡Pago exitoso! Tu pedido ha sido registrado.');
-
-        // Limpiar carrito
-        cart = [];
-        saveCartToLocalStorage();
-        updateCartCount();
-        renderCart();
-
-        paymentModal.style.display = 'none';
-        paymentForm.reset();
-
-        // Abrir la nota/ticket en una nueva pestaña
-        window.open(`/api/pedidos/${result.idPedido}/ticket`, '_blank');
-
-        // Recargar para actualizar stock visual
-        location.reload();
-
-    } catch (error) {
-        console.error('Error:', error);
-        alert('Error al procesar el pedido: ' + error.message);
-    } finally {
-        submitBtn.textContent = originalBtnText;
-        submitBtn.disabled = false;
-    }
-});
 
 // Inicializa el contador del carrito y carga desde localStorage
 loadCartFromLocalStorage();
