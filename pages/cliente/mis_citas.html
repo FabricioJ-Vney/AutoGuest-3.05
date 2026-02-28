@@ -327,6 +327,10 @@
             border-left-color: #3498db;
         }
 
+        .appointment-card.Esperando-Confirmacion-Cliente {
+            border-left-color: #e67e22;
+        }
+
         .appointment-card.Completado {
             border-left-color: #2ecc71;
         }
@@ -349,6 +353,10 @@
 
         .appointment-card.En-Proceso .appointment-icon {
             color: #3498db;
+        }
+
+        .appointment-card.Esperando-Confirmacion-Cliente .appointment-icon {
+            color: #e67e22;
         }
 
         .appointment-card.Completado .appointment-icon {
@@ -416,6 +424,11 @@
         .status-badge.En-Proceso {
             color: #3498db;
             background: rgba(52, 152, 219, 0.12);
+        }
+
+        .status-badge.Esperando-Confirmacion-Cliente {
+            color: #e67e22;
+            background: rgba(230, 126, 34, 0.12);
         }
 
         .status-badge.Cotizado {
@@ -608,6 +621,7 @@
                 'Pendiente de Cotización': 2,
                 'Cotizado': 3,
                 'En Proceso': 4,
+                'Esperando Confirmacion Cliente': 4.5,
                 'Completado': 5,
                 'Cancelado': 6
             };
@@ -619,6 +633,7 @@
                     case 'Pendiente de Cotización': return 'fa-clock';
                     case 'En Proceso': return 'fa-tools';
                     case 'Cotizado': return 'fa-file-invoice-dollar';
+                    case 'Esperando Confirmacion Cliente': return 'fa-clipboard-check';
                     case 'Completado': return 'fa-check-circle';
                     case 'Cancelado': return 'fa-times-circle';
                     default: return 'fa-wrench';
@@ -631,6 +646,7 @@
                     case 'Pendiente de Cotización': return 'El taller está preparando tu cotización.';
                     case 'Cotizado': return 'Tienes una cotización lista para revisar.';
                     case 'En Proceso': return 'Tu vehículo está siendo atendido.';
+                    case 'Esperando Confirmacion Cliente': return 'El trabajo ha finalizado. Por favor, confirma la entrega.';
                     case 'Completado': return '¡Listo! Contacta al taller para recoger tu vehículo.';
                     case 'Cancelado': return 'Esta cita fue cancelada.';
                     default: return estado;
@@ -706,7 +722,7 @@
                     c.estado === 'Pendiente' || c.estado === 'Pendiente de Cotización' || c.estado === 'Cotizado'
                 ).length;
                 document.getElementById('count-proceso').textContent = citas.filter(c => c.estado === 'En Proceso').length;
-                document.getElementById('count-completado').textContent = citas.filter(c => c.estado === 'Completado').length;
+                document.getElementById('count-completado').textContent = citas.filter(c => c.estado === 'Completado' || c.estado === 'Esperando Confirmacion Cliente').length;
                 document.getElementById('count-cancelado').textContent = citas.filter(c => c.estado === 'Cancelado').length;
             };
 
@@ -743,6 +759,8 @@
                     citasFiltradas = todasLasCitas.filter(c =>
                         c.estado === 'Pendiente' || c.estado === 'Pendiente de Cotización' || c.estado === 'Cotizado'
                     );
+                } else if (filtro === 'Completado') {
+                    citasFiltradas = todasLasCitas.filter(c => c.estado === 'Completado' || c.estado === 'Esperando Confirmacion Cliente');
                 } else {
                     citasFiltradas = todasLasCitas.filter(c => c.estado === filtro);
                 }

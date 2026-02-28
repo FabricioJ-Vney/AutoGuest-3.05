@@ -8,6 +8,10 @@ document.addEventListener('DOMContentLoaded', () => {
         pathname.endsWith('/') ||
         pathname.includes('index.html'); // Index is the true home
 
+    const isLogin = pathname.includes('login_cliente.html') ||
+        pathname.includes('login_taller.html') ||
+        pathname.includes('login_mecanico.html');
+
     if (!isDashboard) {
         // Encontrar el contenedor o menú cabecera principal ("header" / "dashboard-header" / "simple-header")
         let header = document.querySelector('header');
@@ -56,7 +60,7 @@ document.addEventListener('DOMContentLoaded', () => {
         btnBack.onmouseout = () => { btnBack.style.transform = 'scale(1)'; btnBack.style.color = '#f39c12'; };
         btnBack.onclick = (e) => {
             e.preventDefault();
-            if(window.history.length>1){window.history.back();}else{window.location.href='/index.html';}
+            if (window.history.length > 1) { window.history.back(); } else { window.location.href = '/index.html'; }
         };
         btnBackWrap.appendChild(btnBack);
 
@@ -87,7 +91,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (pathname.includes('/cliente/')) {
                 window.location.href = host + '/pages/cliente/dashboard_cliente.html';
             } else if (pathname.includes('/taller/')) {
-                window.location.href = host + '/pages/taller/dashboard_taller.html';
+                window.location.href = host + '/portal_taller.html';
             } else if (pathname.includes('/mecanico/')) {
                 window.location.href = host + '/pages/mecanico/dashboard_mecanico.html';
             } else if (pathname.includes('detalle_taller.html')) {
@@ -110,8 +114,10 @@ document.addEventListener('DOMContentLoaded', () => {
         // 1. Inyectar Flecha como PRIMERO hijo del header
         header.insertBefore(btnBackWrap, header.firstChild);
 
-        // 2. Inyectar Casita como ÚLTIMO hijo del header
-        header.appendChild(btnHomeWrap);
+        // 2. Inyectar Casita como ÚLTIMO hijo del header (Omitir en páginas de login)
+        if (!isLogin) {
+            header.appendChild(btnHomeWrap);
+        }
 
         // Si el contenedor que envuelve al logo (o el logo mismo) existe, nos aseguramos que se centre
         const logoImg = document.querySelector('img.logo') || document.querySelector('.logo img') || document.querySelector('.logo') || document.querySelector('img[src*="Logo_Autoguest"]');

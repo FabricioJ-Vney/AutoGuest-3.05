@@ -52,7 +52,7 @@ function aplicarFiltros() {
     const filtered = allCitas.filter(cita => {
         const s = cita.estado;
         if (currentFilter === 'Pendiente') {
-            return ['Pendiente', 'Pendiente de Cotización', 'Cotizado', 'En Proceso'].includes(s);
+            return ['Pendiente', 'Pendiente de Cotización', 'Cotizado', 'En Proceso', 'Esperando Confirmacion Cliente'].includes(s);
         } else if (currentFilter === 'Completado') {
             return ['Completado', 'Entregado'].includes(s);
         } else if (currentFilter === 'Cancelada') {
@@ -70,7 +70,7 @@ function mostrarCitas(citas) {
     if (!tbody) return;
 
     if (citas.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #888;">No hay citas en esta categoría</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: #888;">No hay citas en esta categoría</td></tr>';
         return;
     }
 
@@ -80,20 +80,25 @@ function mostrarCitas(citas) {
 
         // Logic for mechanic select: if manual assignment is needed
         // Assuming mechanic select population happens via `cargarMecanicos` later
+        const isFinished = (cita.estado === 'Completado' || cita.estado === 'Cancelado' || cita.estado === 'Esperando Confirmacion Cliente' || cita.estado === 'Entregado');
 
         return `
             <tr>
+                <td>
+                    ${cita.idCita} 
+                    <button onclick="navigator.clipboard.writeText('${cita.idCita}'); alert('ID Copiado');" style="background:none; border:none; color:#f39c12; cursor:pointer;" title="Copiar ID"><i class="fas fa-copy"></i></button>
+                </td>
                 <td>${fecha} ${hora}</td>
                 <td>${cita.clienteNombre}</td>
                 <td>${cita.marca} (${cita.placa})</td>
                 <td>
-                    <select class="select-mecanico" data-cita-id="${cita.idCita}" data-mecanico-actual="${cita.idMecanico}">
+                    <select class="select-mecanico" data-cita-id="${cita.idCita}" data-mecanico-actual="${cita.idMecanico}" ${isFinished ? 'disabled' : ''}>
                         <option value="">Cargando...</option>
                     </select>
                 </td>
                 <td><span class="status-badge status-${cita.estado.replace(/\s+/g, '')}">${cita.estado}</span></td>
                 <td>
-                    <button class="btn-cambiar-mecanico" onclick="cambiarMecanico('${cita.idCita}')" title="Guardar Mecánico">
+                    <button class="btn-cambiar-mecanico" onclick="cambiarMecanico('${cita.idCita}')" title="Guardar Mecánico" ${isFinished ? 'disabled style="opacity:0.5; cursor:not-allowed;"' : ''}>
                         <i class="fas fa-save"></i>
                     </button>
                     <button class="btn" onclick="verDetalles('${cita.idCita}')" style="padding: 8px 12px; font-size: 14px;">Detalles</button>
@@ -101,7 +106,7 @@ function mostrarCitas(citas) {
                     <button class="btn" onclick="abrirChatAdmin('${cita.idCita}', '${cita.clienteNombre}')" style="padding: 8px 12px; font-size: 14px; background-color: #3498db; margin-left: 5px;">
                         <i class="fas fa-comments"></i> Chat
                     </button>
-                    ${(cita.estado !== 'Completado' && cita.estado !== 'Cancelado' && cita.estado !== 'Entregado') ?
+                    ${!isFinished ?
                 `<button class="btn-completar" onclick="completarCita('${cita.idCita}')" style="background-color: #2ecc71; margin-left: 5px;" title="Completar">
                             <i class="fas fa-check"></i>
                         </button>` : ''
@@ -122,7 +127,7 @@ let mecanicosDisponibles = [];
 
 async function cargarMecanicos() {
     try {
-        const response = await fetch('/api/taller/mecanicos');
+        const response = await fetch('/api/taller/mecanicos-activos');
 
         if (response.status === 401) {
             // No alertamos aquí para no spammear si se llama junto con otras funciones
@@ -330,8 +335,87 @@ if (closeModalBtn) {
 // Cerrar modal con click afuera
 window.onclick = (event) => {
     const modal = document.getElementById('detailsModal');
-    if (event.target == modal) {
+    if (modal && event.target == modal) {
         modal.style.display = "none";
         modal.classList.remove('active');
     }
+
+    // También cerrar el chat modal
+    const chatModal = document.getElementById('chatModal');
+    if (chatModal && event.target == chatModal) {
+        chatModal.style.display = "none";
+        chatModal.classList.remove('active');
+    }
 };
+
+// --- LÓGICA DEL CHAT SUPERVISIÓN ---
+window.abrirChatAdmin = function (idCita, clienteNombre) {
+    const modal = document.getElementById('chatModal');
+    if (modal) {
+        modal.querySelector('h2').textContent = `Chat de Cita: ${idCita} - Cliente: ${clienteNombre || ''}`;
+        modal.style.display = 'flex';
+        modal.classList.add('active');
+        cargarMensajesChat(idCita);
+    }
+};
+
+async function cargarMensajesChat(idCita) {
+    const container = document.getElementById('chatMessages');
+    container.innerHTML = '<p style="color:#aaa; text-align:center;">Cargando mensajes...</p>';
+
+    try {
+        const res = await fetch(`/api/chat/${idCita}`);
+        if (!res.ok) throw new Error('Error al cargar chat');
+
+        const mensajes = await res.json();
+
+        if (mensajes.length === 0) {
+            container.innerHTML = '<p style="color:#aaa; text-align:center;">No hay mensajes en este chat.</p>';
+            return;
+        }
+
+        container.innerHTML = mensajes.map(msg => {
+            const esMecanico = msg.remitenteTipo === 'mecanico';
+            const align = esMecanico ? 'align-self: flex-start; background: #2c3e50;' : 'align-self: flex-end; background: #e67e22; color: #1a1a1a;';
+            const labelColor = esMecanico ? '#a0a0a0' : '#333';
+
+            let contentText = msg.contenido;
+            if (msg.tipoContenido === 'imagen') {
+                contentText = `<img src="${msg.contenido}" style="max-width: 100%; border-radius: 5px; margin-top: 5px;">`;
+            }
+
+            return `
+                <div style="max-width: 70%; padding: 10px 15px; border-radius: 8px; ${align}">
+                    <div style="font-size: 0.8em; color: ${labelColor}; margin-bottom: 5px; font-weight: bold;">
+                        ${msg.remitenteNombre} (${msg.remitenteTipo})
+                    </div>
+                    <div>${contentText}</div>
+                    <div style="font-size: 0.7em; color: ${labelColor}; opacity: 0.8; margin-top: 5px; text-align: right;">
+                        ${new Date(msg.fechaEnvio).toLocaleString()}
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        // Scroll to bottom
+        container.scrollTop = container.scrollHeight;
+
+    } catch (e) {
+        console.error(e);
+        container.innerHTML = '<p style="color:#e74c3c; text-align:center;">Error al cargar los mensajes.</p>';
+    }
+}
+
+// Cerrar modal de chat
+document.addEventListener('DOMContentLoaded', () => {
+    const closeChatBtn = document.getElementById('closeChatModalBtn');
+    if (closeChatBtn) {
+        closeChatBtn.addEventListener('click', () => {
+            const modal = document.getElementById('chatModal');
+            if (modal) {
+                modal.style.display = 'none';
+                modal.classList.remove('active');
+            }
+        });
+    }
+});

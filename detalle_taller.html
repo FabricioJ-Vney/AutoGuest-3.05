@@ -220,6 +220,10 @@
                     con especialistas certificados y la mejor tecnología para el diagnóstico y reparación de tu
                     vehículo.</p>
 
+                <div id="contactoTaller" style="margin-top: 15px; font-size: 1.1em; color: #ccc;">
+                    <!-- Contact info loaded dynamically -->
+                </div>
+
                 <div id="catalogSection"
                     style="display:none; border-top: 1px solid #444; padding-top: 20px; margin-top: 20px;">
                     <p><i class="fas fa-box-open"></i> También vendemos refacciones y productos directamente.</p>
@@ -311,8 +315,25 @@
                 document.getElementById('direccionTaller').innerHTML = `<i class="fas fa-map-marker-alt"></i> ${data.info.direccion}`;
 
                 // Imagen
-                const randomImg = `https://source.unsplash.com/800x400/?garage,mechanic&sig=${idTaller.replace(/\\D/g, '')}`;
-                document.getElementById('bannerTaller').style.backgroundImage = `url('${randomImg}')`;
+                if (data.info.foto_perfil) {
+                    document.getElementById('bannerTaller').style.backgroundImage = `url('${data.info.foto_perfil}')`;
+                } else {
+                    const randomImg = `https://source.unsplash.com/800x400/?garage,mechanic&sig=${idTaller.replace(/\\D/g, '')}`;
+                    document.getElementById('bannerTaller').style.backgroundImage = `url('${randomImg}')`;
+                }
+
+                // Contacto y Redes
+                const contactoDiv = document.getElementById('contactoTaller');
+                let contactoHtml = '';
+                if (data.info.telefono_contacto) {
+                    contactoHtml += `<p><i class="fab fa-whatsapp" style="color: #25D366;"></i> WhatsApp: <a href="https://wa.me/${data.info.telefono_contacto}" target="_blank" style="color: #f39c12; text-decoration: none;">${data.info.telefono_contacto}</a></p>`;
+                }
+                if (data.info.redes_sociales) {
+                    contactoHtml += `<p><i class="fas fa-globe" style="color: #4267B2;"></i> Redes: <a href="${data.info.redes_sociales.startsWith('http') ? data.info.redes_sociales : 'https://' + data.info.redes_sociales}" target="_blank" style="color: #f39c12; text-decoration: none;">${data.info.redes_sociales}</a></p>`;
+                }
+                if (contactoHtml !== '') {
+                    contactoDiv.innerHTML = contactoHtml;
+                }
 
                 // Mostrar botón catálogo si tiene productos
                 if (data.tieneProductos) {
@@ -355,10 +376,10 @@
 
             try {
                 const resVehiculos = await fetch(`${API_URL}/api/vehiculos`, {
-                    headers: { 
-                        'Authorization': 'Bearer ' + localStorage.getItem('token'), 
-                        'Content-Type': 'application/json' 
-                    }, 
+                    headers: {
+                        'Authorization': 'Bearer ' + localStorage.getItem('token'),
+                        'Content-Type': 'application/json'
+                    },
                     credentials: 'include' // Obligatorio para enviar la cookie de sesión de Express
                 });
 
@@ -415,11 +436,11 @@
                 try {
                     const res = await fetch(`${API_URL}/api/citas`, {
                         method: 'POST',
-                        headers: { 
-                        'Authorization': 'Bearer ' + localStorage.getItem('token'), 
-                        'Content-Type': 'application/json' 
-                    }, 
-                    credentials: 'include', // Enviar la cookie
+                        headers: {
+                            'Authorization': 'Bearer ' + localStorage.getItem('token'),
+                            'Content-Type': 'application/json'
+                        },
+                        credentials: 'include', // Enviar la cookie
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(citaData)
                     });
@@ -484,7 +505,13 @@
         }
 
         function irCatalogo() {
-            window.location.href = 'pages/cliente/catalogo-om66/Catalogo_Productos.html';
+            const params = new URLSearchParams(window.location.search);
+            const idTaller = params.get('id');
+            if (idTaller) {
+                window.location.href = `pages/cliente/catalogo-om66/Catalogo_Productos.html?idTaller=${idTaller}`;
+            } else {
+                window.location.href = 'pages/cliente/catalogo-om66/Catalogo_Productos.html';
+            }
         }
     </script>
 

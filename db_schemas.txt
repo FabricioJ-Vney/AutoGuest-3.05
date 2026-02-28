@@ -1,0 +1,55 @@
+CREATE TABLE `iteminventario` (
+  `idItem` varchar(50) NOT NULL,
+  `nombre` varchar(100) NOT NULL,
+  `precio` float DEFAULT NULL,
+  `stock` int(11) DEFAULT NULL,
+  `esParaVenta` tinyint(1) DEFAULT NULL,
+  `esParaServicio` tinyint(1) DEFAULT NULL,
+  `idTaller` varchar(50) NOT NULL,
+  `imagen` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`idItem`),
+  KEY `idTaller` (`idTaller`),
+  CONSTRAINT `iteminventario_ibfk_1` FOREIGN KEY (`idTaller`) REFERENCES `taller` (`idTaller`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci
+
+CREATE TABLE `taller` (
+  `idTaller` varchar(50) NOT NULL,
+  `nombre` varchar(100) NOT NULL,
+  `direccion` varchar(255) DEFAULT NULL,
+  `latitud` decimal(10,8) DEFAULT NULL,
+  `longitud` decimal(11,8) DEFAULT NULL,
+  `foto_perfil` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`idTaller`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci
+
+CREATE TABLE `resenas` (
+  `idResena` int(11) NOT NULL AUTO_INCREMENT,
+  `idTaller` varchar(50) NOT NULL,
+  `idUsuario` varchar(50) NOT NULL,
+  `calificacion` int(1) NOT NULL,
+  `comentario` text DEFAULT NULL,
+  `fecha` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`idResena`),
+  KEY `fk_resena_taller` (`idTaller`),
+  KEY `fk_resena_usuario` (`idUsuario`),
+  CONSTRAINT `fk_resena_taller` FOREIGN KEY (`idTaller`) REFERENCES `taller` (`idTaller`) ON DELETE CASCADE,
+  CONSTRAINT `fk_resena_usuario` FOREIGN KEY (`idUsuario`) REFERENCES `cliente` (`idUsuario`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=51 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci
+
+CREATE TABLE `cita` (
+  `idCita` varchar(50) NOT NULL,
+  `fechaHora` datetime NOT NULL,
+  `estado` varchar(50) DEFAULT NULL,
+  `idCliente` varchar(50) NOT NULL,
+  `idVehiculo` varchar(50) NOT NULL,
+  `idMecanico` varchar(50) DEFAULT NULL,
+  `idTaller` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`idCita`),
+  KEY `idCliente` (`idCliente`),
+  KEY `idVehiculo` (`idVehiculo`),
+  KEY `idMecanico` (`idMecanico`),
+  CONSTRAINT `cita_ibfk_1` FOREIGN KEY (`idCliente`) REFERENCES `cliente` (`idUsuario`) ON DELETE NO ACTION ON UPDATE CASCADE,
+  CONSTRAINT `cita_ibfk_2` FOREIGN KEY (`idVehiculo`) REFERENCES `vehiculo` (`idVehiculo`) ON DELETE NO ACTION ON UPDATE CASCADE,
+  CONSTRAINT `cita_ibfk_3` FOREIGN KEY (`idMecanico`) REFERENCES `mecanico` (`idUsuario`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci
+

@@ -143,11 +143,307 @@
             line-height: 1.6;
         }
 
+        /* Dropdown de Ajustes */
+        .settings-dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .settings-btn {
+            background: none;
+            border: none;
+            color: #f39c12;
+            font-size: 1.8em;
+            cursor: pointer;
+            transition: transform 0.2s;
+            padding: 5px;
+        }
+
+        .settings-content {
+            display: none;
+            position: absolute;
+            right: 0;
+            background-color: #2c2c2c;
+            min-width: 180px;
+            box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.5);
+            z-index: 10;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #444;
+        }
+
+        .settings-content a,
+        .settings-content button {
+            color: white;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+            background: none;
+            border: none;
+            width: 100%;
+            text-align: left;
+            font-size: 1em;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        .settings-content a:hover,
+        .settings-content button:hover {
+            background-color: #444;
+            color: #f39c12;
+        }
+
+        .settings-content.active {
+            display: block;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background-color: #2c2c2c;
+            padding: 30px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            position: relative;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close-modal:hover {
+            color: #f39c12;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            color: #ccc;
+            margin-bottom: 8px;
+        }
+
+        .dark-input {
+            width: 100%;
+            padding: 10px;
+            background-color: #1a1a1a;
+            border: 1px solid #444;
+            color: white;
+            border-radius: 6px;
+            font-family: inherit;
+        }
+
+        .action-btn {
+            background-color: #f39c12;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            width: 100%;
+            transition: background 0.3s;
+        }
+
+        .action-btn:hover {
+            background-color: #e67e22;
+        }
+
         @media (max-width: 768px) {
             .portal-header {
                 flex-direction: column;
                 gap: 15px;
             }
+        }
+
+        /* === Sistema de Notificaciones === */
+        .notification-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+
+        .notification-trigger {
+            background: none;
+            border: none;
+            color: #f39c12;
+            font-size: 1.6em;
+            cursor: pointer;
+            padding: 8px;
+            position: relative;
+            transition: transform 0.2s;
+        }
+
+        .notification-trigger:hover {
+            transform: scale(1.1);
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            background-color: #e74c3c;
+            color: white;
+            border-radius: 50%;
+            padding: 2px 6px;
+            font-size: 0.6em;
+            font-weight: bold;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            border: 2px solid #1a1a1a;
+        }
+
+        .notification-dropdown {
+            display: none;
+            position: absolute;
+            top: 100%;
+            right: 0;
+            width: 350px;
+            background-color: #2c2c2c;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            border: 1px solid #444;
+            border-radius: 12px;
+            margin-top: 15px;
+            z-index: 1000;
+            overflow: hidden;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        .notification-dropdown.active {
+            display: block;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .notification-header {
+            padding: 15px 20px;
+            background-color: #333;
+            border-bottom: 1px solid #444;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .notification-header h3 {
+            margin: 0;
+            font-size: 1.1em;
+            color: #f39c12;
+        }
+
+        .notification-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .notification-item {
+            padding: 15px 20px;
+            border-bottom: 1px solid #3a3a3a;
+            display: flex;
+            gap: 15px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .notification-item:hover {
+            background-color: #3a3a3a;
+        }
+
+        .notification-item.unread {
+            background-color: rgba(243, 156, 18, 0.05);
+            border-left: 3px solid #f39c12;
+        }
+
+        .notification-icon {
+            font-size: 1.4em;
+            margin-top: 3px;
+        }
+
+        .notification-content {
+            flex: 1;
+        }
+
+        .notification-content strong {
+            display: block;
+            font-size: 0.95em;
+            color: #fff;
+            margin-bottom: 4px;
+        }
+
+        .notification-content p {
+            margin: 0;
+            font-size: 0.85em;
+            color: #aaa;
+            line-height: 1.4;
+        }
+
+        .notification-time {
+            display: block;
+            font-size: 0.75em;
+            color: #777;
+            margin-top: 8px;
+        }
+
+        .notification-empty {
+            padding: 40px 20px;
+            text-align: center;
+            color: #888;
+            font-style: italic;
+        }
+
+        .text-danger {
+            color: #e74c3c;
+        }
+
+        .text-warning {
+            color: #f1c40f;
+        }
+
+        .text-success {
+            color: #2ecc71;
+        }
+
+        .text-info {
+            color: #3498db;
+        }
+
+        .text-primary {
+            color: #f39c12;
         }
     </style>
 </head>
@@ -155,23 +451,40 @@
 <body>
 
     <header class="portal-header">
-        <a href="home.html">
+        <div style="cursor: default;">
             <img src="imagenes/Logo_Autoguest.png" alt="Logo de AutoGuest" class="logo">
-        </a>
+        </div>
         <div class="header-info" style="display: flex; gap: 20px; align-items: center;">
+            <!-- Sistema de Notificaciones Unificado -->
+            <div class="notification-wrapper">
+                <button class="notification-trigger" id="notificationTrigger"
+                    onclick="NotificationSystem.toggleDropdown()">
+                    <i class="fas fa-bell"></i>
+                    <span class="notification-badge" id="notificationBadge">0</span>
+                </button>
+                <div class="notification-dropdown" id="notificationDropdown">
+                    <div class="notification-header">
+                        <h3>Notificaciones</h3>
+                    </div>
+                    <div class="notification-list" id="notificationList">
+                        <div class="notification-empty">Cargando...</div>
+                    </div>
+                </div>
+            </div>
             <div style="text-align: right; margin-right: 20px;">
                 <h2 id="workshopName">Mecánica Rápida S.L.</h2>
                 <p>Portal de Taller</p>
             </div>
 
-            <a href="pages/taller/perfil_taller.html" title="Perfil del Taller"
-                style="color: #f39c12; font-size: 1.8em; text-decoration: none; transition: transform 0.2s;"><i
-                    class="fas fa-user-circle"></i></a>
-            <a href="ajustes_taller.html" title="Ajustes"
-                style="color: #f39c12; font-size: 1.8em; text-decoration: none; transition: transform 0.2s;"><i
-                    class="fas fa-cog"></i></a>
-
-            <a href="index.html" class="logout-btn" style="margin-left: 15px;">Cerrar Sesión</a>
+            <div class="settings-dropdown">
+                <button class="settings-btn"><i class="fas fa-cog"></i></button>
+                <div class="settings-content">
+                    <button id="btnOpenPerfil"><i class="fas fa-user-circle"></i> Mi Perfil</button>
+                    <!-- <a href="pages/taller/inventario.html"><i class="fas fa-boxes"></i> Inventario</a> -->
+                    <!-- <a href="pages/taller/punto_venta.html"><i class="fas fa-cash-register"></i> Punto de Venta</a> -->
+                    <button id="btnLogoutModal"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</button>
+                </div>
+            </div>
         </div>
     </header>
 
@@ -190,6 +503,14 @@
                     <p>Mecánicos Activos</p>
                 </div>
             </div>
+            <a href="pages/taller/resenas_taller.html" style="text-decoration:none; color:inherit; display:block;">
+                <div class="kpi-card"><i class="fas fa-star kpi-icon" style="color: #f1c40f;"></i>
+                    <div class="kpi-info">
+                        <h3>Reseñas</h3>
+                        <p>Ver y responder valoraciones</p>
+                    </div>
+                </div>
+            </a>
         </section>
         <section class="actions-grid">
             <a href="pages/taller/gestionar_citas.html" class="action-card"><i
@@ -207,8 +528,49 @@
                 <h3>Gestionar Mecánicos</h3>
                 <p>Ver solicitudes de mecánicos y administra el personal activo de tu taller.</p>
             </a>
+            <a href="pages/taller/gestionar_inventario.html" class="action-card"><i
+                    class="fas fa-boxes action-icon"></i>
+                <h3>Inventario</h3>
+                <p>Administra tus productos en venta, existencias y precios.</p>
+            </a>
+            <a href="pages/taller/punto_venta.html" class="action-card" style="border: 1px solid #2ecc71;"><i
+                    class="fas fa-cash-register action-icon" style="color: #2ecc71;"></i>
+                <h3 style="color:#2ecc71;">Punto de Venta</h3>
+                <p>Realiza ventas físicas y registra cobros en efectivo.</p>
+            </a>
         </section>
     </main>
+
+    <!-- MODAL PERFIL TALLER -->
+    <div id="perfilModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" id="closePerfilModal">&times;</span>
+            <h2 style="color: #f39c12; margin-top: 0; margin-bottom: 20px;">
+                <i class="fas fa-user-circle"></i> Perfil del Taller
+            </h2>
+            <form id="perfilForm">
+                <div class="form-group" style="text-align: center;">
+                    <img id="previewFoto" src="imagenes/default_taller.png" alt="Foto Taller"
+                        style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 2px solid #555; margin-bottom: 10px;">
+                    <div>
+                        <label for="fotoInput"
+                            style="cursor: pointer; color: #3498db; text-decoration: underline;">Cambiar Foto</label>
+                        <input type="file" id="fotoInput" accept="image/*" style="display: none;">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Nombre del Taller:</label>
+                    <input type="text" id="perfilNombre" class="dark-input" required>
+                </div>
+                <div class="form-group">
+                    <label>Link de Google Maps:</label>
+                    <input type="url" id="perfilMaps" class="dark-input" placeholder="https://maps.google.com/...">
+                </div>
+                <button type="submit" class="action-btn" id="btnSavePerfil"><i class="fas fa-save"></i> Guardar
+                    Cambios</button>
+            </form>
+        </div>
+    </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -242,31 +604,155 @@
 
 
             // 3. Funcionalidad de Cerrar Sesión
-            document.querySelector('.logout-btn').addEventListener('click', (e) => {
+            document.getElementById('btnLogoutModal').addEventListener('click', (e) => {
                 e.preventDefault();
                 sessionStorage.clear(); // Borrar datos de sesión
                 window.location.href = 'index.html';
             });
 
+            // 4. Lógica del Modal de Perfil
+            const modal = document.getElementById('perfilModal');
+            const btnOpen = document.getElementById('btnOpenPerfil');
+            const btnClose = document.getElementById('closePerfilModal');
+            const fotoInput = document.getElementById('fotoInput');
+            const previewFoto = document.getElementById('previewFoto');
+            let currentBase64 = null;
+
+            btnOpen.addEventListener('click', async () => {
+                // Cargar datos actuales
+                try {
+                    const res = await fetch('/api/taller/perfil');
+                    if (res.ok) {
+                        const data = await res.json();
+                        document.getElementById('perfilNombre').value = data.nombre || '';
+                        document.getElementById('perfilMaps').value = data.link_maps || '';
+                        if (data.foto_perfil) {
+                            previewFoto.src = data.foto_perfil;
+                        }
+                    }
+                } catch (e) { console.error('Error cargando perfil', e); }
+                modal.classList.add('active');
+            });
+
+            btnClose.addEventListener('click', () => modal.classList.remove('active'));
+            window.addEventListener('click', (e) => {
+                if (e.target === modal) modal.classList.remove('active');
+            });
+
+            fotoInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function (evt) {
+                        currentBase64 = evt.target.result;
+                        previewFoto.src = currentBase64;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            document.getElementById('perfilForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const btnSave = document.getElementById('btnSavePerfil');
+                btnSave.disabled = true;
+                btnSave.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+
+                const body = {
+                    nombre: document.getElementById('perfilNombre').value,
+                    link_maps: document.getElementById('perfilMaps').value
+                };
+                if (currentBase64) {
+                    body.foto_perfil = currentBase64;
+                }
+
+                try {
+                    const res = await fetch('/api/taller/perfil', {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(body)
+                    });
+                    if (res.ok) {
+                        alert('Perfil actualizado con éxito');
+                        sessionStorage.setItem('tallerName', body.nombre);
+                        document.getElementById('workshopName').textContent = body.nombre;
+                        modal.classList.remove('active');
+                    } else {
+                        alert('Error al guardar el perfil');
+                    }
+                } catch (err) {
+                    alert('Error de conexión');
+                } finally {
+                    btnSave.disabled = false;
+                    btnSave.innerHTML = '<i class="fas fa-save"></i> Guardar Cambios';
+                }
+            });
+
             // 4. Cargar Estadísticas
             async function loadStats() {
                 try {
-                    // Update to match new admin endpoint instead of /api/taller/stats which might return different things,
-                    // but keeping it simple for now, we'll only use mecanicos count.
                     const res = await fetch('/api/taller/stats');
                     if (res.ok) {
                         const data = await res.json();
                         if (document.getElementById('mecanicos-count'))
                             document.getElementById('mecanicos-count').textContent = data.mecanicos;
-                        // Clientes was removed from UI
                     }
                 } catch (e) { console.error("Error loading stats", e); }
             }
             loadStats();
+
+            // 5. Cargar Alertas de Stock
+            async function checkStockAlerts() {
+                try {
+                    const res = await fetch('/api/inventario/taller');
+                    if (res.ok) {
+                        const items = await res.json();
+                        const lowStockItems = items.filter(i => i.stock <= 5);
+                        if (lowStockItems.length > 0) {
+                            const badge = document.getElementById('stockAlertBadge');
+                            const alertDiv = document.getElementById('stockAlerts');
+                            if (alertDiv) alertDiv.style.display = 'block';
+                            if (badge) badge.textContent = lowStockItems.length;
+                        }
+                    }
+                } catch (e) { console.error("Error comprobando stock", e); }
+            }
+            checkStockAlerts();
+            // 6. Manejo de Menú de Ajustes
+            const settingsDropdown = document.querySelector('.settings-dropdown');
+            const settingsTrigger = document.querySelector('.settings-trigger');
+            const settingsContent = document.querySelector('.settings-content');
+
+            if (settingsTrigger && settingsContent) {
+                settingsTrigger.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    settingsContent.classList.toggle('active');
+                });
+            }
+
+            document.addEventListener('click', (e) => {
+                if (settingsContent && !settingsContent.contains(e.target) && !settingsTrigger.contains(e.target)) {
+                    settingsContent.classList.remove('active');
+                }
+            });
+
+            // 7. Cargar Foto de Perfil si existe
+            async function loadProfile() {
+                try {
+                    const res = await fetch('/api/taller/perfil');
+                    if (res.ok) {
+                        const data = await res.json();
+                        if (data.foto_perfil) {
+                            const preview = document.getElementById('previewFoto');
+                            if (preview) preview.src = data.foto_perfil;
+                        }
+                    }
+                } catch (e) { console.error("Error loading profile photo", e); }
+            }
+            loadProfile();
         });
     </script>
+    <script src="js/notifications.js"></script>
     <script src="pages/taller/citas-admin.js"></script>
-    <script src="http://localhost:3000/js/global_nav.js"></script>
 </body>
 
 </html>

@@ -167,10 +167,22 @@
 
         <form id="profileForm">
             <div class="form-group">
-                <label for="fotoUrl"><i class="fas fa-image"></i> Enlace de Foto de Perfil (URL)</label>
-                <input type="url" id="fotoUrl" placeholder="https://ejemplo.com/mifoto.jpg" required>
+                <label for="nombreTallerInput"><i class="fas fa-store"></i> Nombre del Taller</label>
+                <input type="text" id="nombreTallerInput" placeholder="Ej. AutoSur" required>
             </div>
-            <button type="submit" class="btn"><i class="fas fa-save"></i> Guardar Foto</button>
+            <div class="form-group">
+                <label for="whatsappUrl"><i class="fab fa-whatsapp"></i> Número de WhatsApp (Ej. 529991287457)</label>
+                <input type="text" id="whatsappUrl" placeholder="Número con código de país">
+            </div>
+            <div class="form-group">
+                <label for="redesUrl"><i class="fas fa-globe"></i> Redes Sociales (Facebook, Insta, etc.)</label>
+                <input type="text" id="redesUrl" placeholder="Ej. @MiTaller o Link a Facebook">
+            </div>
+            <div class="form-group">
+                <label for="fotoUrl"><i class="fas fa-image"></i> Enlace de Foto de Perfil (URL)</label>
+                <input type="url" id="fotoUrl" placeholder="https://ejemplo.com/mifoto.jpg">
+            </div>
+            <button type="submit" class="btn"><i class="fas fa-save"></i> Guardar Perfil</button>
         </form>
     </div>
 
@@ -180,17 +192,25 @@
             const tallerNameDisplay = document.getElementById('tallerNameDisplay');
             const tallerAddressDisplay = document.getElementById('tallerAddressDisplay');
             const profileImage = document.getElementById('profileImage');
+            const nombreTallerInput = document.getElementById('nombreTallerInput');
+            const whatsappUrl = document.getElementById('whatsappUrl');
+            const redesUrl = document.getElementById('redesUrl');
             const fotoUrl = document.getElementById('fotoUrl');
             const profileForm = document.getElementById('profileForm');
 
             // Cargar información del taller
             try {
-                const res = await fetch('/api/taller/info', { credentials: 'include' });
+                // Fetch full profile
+                const res = await fetch('/api/taller/perfil', { credentials: 'include' });
                 if (res.ok) {
                     const data = await res.json();
                     tallerIdDisplay.textContent = data.idTaller;
                     tallerNameDisplay.textContent = data.nombre;
-                    tallerAddressDisplay.textContent = data.direccion;
+                    tallerAddressDisplay.textContent = data.direccion || 'No especificada';
+
+                    nombreTallerInput.value = data.nombre || '';
+                    whatsappUrl.value = data.telefono_contacto || '';
+                    redesUrl.value = data.redes_sociales || '';
 
                     if (data.foto_perfil) {
                         profileImage.src = data.foto_perfil;
@@ -203,24 +223,31 @@
                 console.error("Error", e);
             }
 
-            // Actualizar foto
+            // Actualizar perfil completo
             profileForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
-                const newUrl = fotoUrl.value;
 
                 try {
-                    const res = await fetch('/api/taller/perfil/foto', {
+                    const res = await fetch('/api/taller/perfil', {
                         method: 'PUT',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ urlFoto: newUrl }),
+                        body: JSON.stringify({
+                            nombre: nombreTallerInput.value,
+                            telefono_contacto: whatsappUrl.value,
+                            redes_sociales: redesUrl.value,
+                            foto_perfil: fotoUrl.value
+                        }),
                         credentials: 'include'
                     });
 
                     if (res.ok) {
-                        alert('Foto actualizada exitosamente.');
-                        profileImage.src = newUrl;
+                        alert('Perfil actualizado exitosamente.');
+                        if (fotoUrl.value) {
+                            profileImage.src = fotoUrl.value;
+                        }
+                        tallerNameDisplay.textContent = nombreTallerInput.value;
                     } else {
-                        alert('Error al guardar la foto.');
+                        alert('Error al guardar el perfil.');
                     }
                 } catch (e) {
                     console.error("Error", e);

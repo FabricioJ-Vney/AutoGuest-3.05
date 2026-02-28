@@ -54,6 +54,20 @@ router.post('/', async (req, res) => {
             [idPedido, 'Procesando', total, estadoPago, idCliente]
         );
 
+        // Notificar al administrador del taller sobre el nuevo pedido
+        // Buscamos el taller del primer item para simplificar (asumiendo un solo taller por pedido)
+        const [firstItemRows] = await connection.query('SELECT idTaller FROM iteminventario WHERE idItem = ?', [items[0].idItemInventario]);
+        if (firstItemRows.length > 0) {
+            const idTaller = firstItemRows[0].idTaller;
+            const [adminRows] = await connection.query('SELECT idUsuario FROM administrador WHERE idTaller = ? LIMIT 1', [idTaller]);
+            if (adminRows.length > 0) {
+                await connection.query(
+                    'INSERT INTO notificacion (idUsuario, titulo, mensaje, tipo) VALUES (?, ?, ?, ?)',
+                    [adminRows[0].idUsuario, 'Nueva Venta Recibida', `Se ha generado un nuevo pedido (${idPedido}) por un total de $${total.toFixed(2)}.`, 'venta']
+                );
+            }
+        }
+
         // Insertar Líneas de Pedido y actualizar stock
         for (const item of items) {
             await connection.query(
@@ -65,6 +79,18 @@ router.post('/', async (req, res) => {
                 'UPDATE iteminventario SET stock = stock - ? WHERE idItem = ?',
                 [item.cantidad, item.idItemInventario]
             );
+
+            // Notificar al Taller si el producto se agota
+            const [invRows] = await connection.query('SELECT stock, idTaller, nombre FROM iteminventario WHERE idItem = ?', [item.idItemInventario]);
+            if (invRows.length > 0 && invRows[0].stock <= 0) {
+                const [adminRows] = await connection.query('SELECT idUsuario FROM administrador WHERE idTaller = ? LIMIT 1', [invRows[0].idTaller]);
+                if (adminRows.length > 0) {
+                    await connection.query(
+                        'INSERT INTO notificacion (idUsuario, titulo, mensaje, tipo) VALUES (?, ?, ?, ?)',
+                        [adminRows[0].idUsuario, 'Stock Agotado', `El producto "${invRows[0].nombre}" se ha quedado en cero.`, 'inventario']
+                    );
+                }
+            }
         }
 
         // Crear ticket de soporte

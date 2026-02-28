@@ -130,6 +130,12 @@
             border: 1px solid rgba(155, 89, 182, 0.3);
         }
 
+        .status-Esperando-Confirmacion-Cliente {
+            color: #e67e22;
+            background: rgba(230, 126, 34, 0.1);
+            border: 1px solid rgba(230, 126, 34, 0.3);
+        }
+
         .info-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -767,6 +773,46 @@
         </div>
     </div>
 
+    <!-- MODAL DE PAGO PARA LIBERAR -->
+    <div class="modal-overlay" id="releasePaymentModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-money-bill-wave"></i> Confirmar y Pagar Servicio</h2>
+                <button class="close-modal-btn" id="closeReleasePaymentModal"><i class="fas fa-times"></i></button>
+            </div>
+
+            <p>Para liberar su vehículo, por favor confirme la entrega realizando el pago restante o ingresando el
+                código proporcionado por el taller en caso de pago en efectivo.</p>
+
+            <div class="quote-total" id="releaseTotal">
+                $0.00 MXN
+            </div>
+
+            <!-- Opciones Iniciales: Código Efectivo vs Online -->
+            <div class="actions-container" id="releaseInitialActions"
+                style="display: flex; flex-direction: column; gap: 15px;">
+                <button class="btn btn-success" id="btnShowCashCode" style="width: 100%;"><i
+                        class="fas fa-ticket-alt"></i> Tengo un código de pago (Efectivo)</button>
+                <div style="text-align: center; color: #888;">-- O paga en línea ahora --</div>
+                <div id="release-paypal-container"></div>
+                <button class="btn-mp" id="btnReleaseMercadoPago"><i class="fas fa-handshake"></i> Pagar con Mercado
+                    Pago</button>
+            </div>
+
+            <!-- Ingreso de Código Efectivo -->
+            <div id="cashCodeSection" style="display: none; margin-top: 20px;">
+                <label style="display: block; margin-bottom: 10px; color: #ddd;">Ingrese el código alfanumérico impreso
+                    en su ticket:</label>
+                <input type="text" id="cashCodeInput" placeholder="Ej. A1B2C3"
+                    style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #444; background: #222; color: #fff; font-size: 1.2em; text-align: center; text-transform: uppercase;">
+                <div style="display: flex; gap: 10px; margin-top: 15px;">
+                    <button class="btn btn-secondary" id="btnCancelCashCode" style="flex: 1;">Cancelar</button>
+                    <button class="btn btn-primary" id="btnSubmitCashCode" style="flex: 1;">Validar Código</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- MODAL DE CHAT -->
     <div class="chat-modal-overlay" id="chatModal">
         <div class="chat-modal-content">
@@ -954,6 +1000,16 @@
                     document.getElementById('btnDownloadTicket').onclick = () => {
                         window.location.href = 'historial_cliente.html';
                     };
+                }
+                else if (cita.estado === 'Esperando Confirmacion Cliente') {
+                    actionsContainer.innerHTML = `
+                        <button class="btn btn-success" id="btnPayToRelease" style="background-color: #2ecc71; color: white;">
+                            <i class="fas fa-check-circle"></i> Pagar para Liberar
+                        </button>
+                    `;
+                    document.getElementById('btnPayToRelease').addEventListener('click', () => {
+                        openReleasePaymentModal(idCita);
+                    });
                 }
 
                 // Mostrar contenido
@@ -1165,6 +1221,190 @@
                         alert('Ocurrió un error con el procesador de PayPal.');
                     }
                 }).render('#paypal-button-container');
+            }
+
+            // ==========================================
+            // Lógica de Pago para Liberar (Confirmación de Entrega)
+            // ==========================================
+            const releaseModal = document.getElementById('releasePaymentModal');
+            let releaseData = null;
+
+            async function openReleasePaymentModal(idCita) {
+                try {
+                    // Reutilizamos el endpoint de cotización para obtener el costo total
+                    const quoteRes = await fetch(API_URL + `/api/citas/${idCita}/cotizacion`, {
+                        headers: getAuthHeaders(),
+                        credentials: 'include'
+                    });
+                    if (!quoteRes.ok) throw new Error('Error al obtener la cotización');
+
+                    releaseData = await quoteRes.json();
+                    document.getElementById('releaseTotal').textContent = `$${parseFloat(releaseData.costoTotal).toFixed(2)} MXN`;
+
+                    // Resetear estado del modal
+                    document.getElementById('releaseInitialActions').style.display = 'flex';
+                    document.getElementById('cashCodeSection').style.display = 'none';
+                    document.getElementById('cashCodeInput').value = '';
+
+                    const paypalContainer = document.getElementById('release-paypal-container');
+                    paypalContainer.innerHTML = '';
+                    renderReleasePayPalButton(parseFloat(releaseData.costoTotal), `Pago Final de Cita ${idCita}`, idCita, citaDataActual?.idMecanico);
+
+                    releaseModal.classList.add('active');
+                } catch (err) {
+                    alert('No se pudo cargar la información de pago: ' + err.message);
+                }
+            }
+
+            if (document.getElementById('closeReleasePaymentModal')) {
+                document.getElementById('closeReleasePaymentModal').addEventListener('click', () => {
+                    releaseModal.classList.remove('active');
+                });
+            }
+
+            if (document.getElementById('btnShowCashCode')) {
+                document.getElementById('btnShowCashCode').addEventListener('click', () => {
+                    document.getElementById('releaseInitialActions').style.display = 'none';
+                    document.getElementById('cashCodeSection').style.display = 'block';
+                });
+            }
+
+            if (document.getElementById('btnCancelCashCode')) {
+                document.getElementById('btnCancelCashCode').addEventListener('click', () => {
+                    document.getElementById('cashCodeSection').style.display = 'none';
+                    document.getElementById('releaseInitialActions').style.display = 'flex';
+                });
+            }
+
+            if (document.getElementById('btnSubmitCashCode')) {
+                document.getElementById('btnSubmitCashCode').addEventListener('click', async () => {
+                    const code = document.getElementById('cashCodeInput').value.trim().toUpperCase();
+                    if (!code) return alert('Ingrese el código de pago');
+
+                    try {
+                        const res = await fetch(API_URL + '/api/citas/' + idCita + '/confirmar-entrega-codigo', {
+                            method: 'PUT',
+                            headers: getAuthHeaders(),
+                            credentials: 'include',
+                            body: JSON.stringify({ codigo: code })
+                        });
+                        const data = await res.json();
+
+                        if (res.ok) {
+                            alert('¡Entrega confirmada con éxito! Su vehículo ha sido liberado.');
+                            window.location.reload();
+                        } else {
+                            throw new Error(data.error || 'Error al validar el código');
+                        }
+                    } catch (e) {
+                        alert(e.message);
+                    }
+                });
+            }
+
+            if (document.getElementById('btnReleaseMercadoPago')) {
+                document.getElementById('btnReleaseMercadoPago').addEventListener('click', async () => {
+                    if (!releaseData || !citaDataActual) return;
+                    try {
+                        const mpConfigRes = await fetch(API_URL + '/api/mercadopago/public-key', {
+                            headers: getAuthHeaders(),
+                            credentials: 'include'
+                        });
+                        const mpConfig = await mpConfigRes.json();
+                        const mp = new MercadoPago(mpConfig.publicKey, { locale: 'es-MX' });
+
+                        const preferenceData = {
+                            title: `Pago Libre Servicio Automotriz - Cita ${idCita}`,
+                            quantity: 1,
+                            price: parseFloat(releaseData.costoTotal),
+                            idCita: idCita,
+                            idMecanico: citaDataActual.idMecanico,
+                            tipo: 'liberacion' // Indicador de que es pago de liberación
+                        };
+
+                        const response = await fetch(API_URL + '/api/mercadopago/create-preference', {
+                            method: 'POST',
+                            headers: getAuthHeaders('application/json'),
+                            credentials: 'include',
+                            body: JSON.stringify(preferenceData)
+                        });
+
+                        const prefRes = await response.json();
+
+                        if (prefRes.id) {
+                            window.location.href = `https://www.mercadopago.com.mx/checkout/v1/redirect?pref_id=${prefRes.id}`;
+                        } else {
+                            throw new Error('No se recibió ID de preferencia');
+                        }
+                    } catch (error) {
+                        console.error('Error MP:', error);
+                        alert('Ocurrió un error al procesar con Mercado Pago.');
+                    }
+                });
+            }
+
+            function renderReleasePayPalButton(amount, description, citaId, mecanicoId) {
+                const container = document.getElementById('release-paypal-container');
+                container.innerHTML = '';
+                if (!window.paypal) return;
+
+                paypal.Buttons({
+                    createOrder: async function () {
+                        try {
+                            const res = await fetch(API_URL + '/api/paypal/create-order', {
+                                method: 'POST',
+                                headers: getAuthHeaders('application/json'),
+                                credentials: 'include',
+                                body: JSON.stringify({
+                                    amount: amount,
+                                    description: description,
+                                    idCita: citaId,
+                                    idMecanico: mecanicoId
+                                })
+                            });
+                            const orderAuth = await res.json();
+                            return orderAuth.id;
+                        } catch (err) {
+                            console.error('Error creando orden paypal:', err);
+                            alert('No se pudo iniciar PayPal');
+                        }
+                    },
+                    onApprove: async function (data) {
+                        try {
+                            const verifyRes = await fetch(API_URL + '/api/paypal/capture-order', {
+                                method: 'POST',
+                                headers: getAuthHeaders('application/json'),
+                                credentials: 'include',
+                                body: JSON.stringify({
+                                    orderID: data.orderID,
+                                    idCita: citaId,
+                                    idMecanico: mecanicoId
+                                })
+                            });
+                            const verifyData = await verifyRes.json();
+
+                            if (verifyData.success) {
+                                // Aquí se libera el vehículo (pago online)
+                                await fetch(API_URL + `/api/citas/${citaId}/confirmar-entrega-online`, {
+                                    method: 'PUT',
+                                    headers: getAuthHeaders(),
+                                    credentials: 'include'
+                                });
+                                alert('¡Pago procesado con éxito! Vehículo liberado.');
+                                window.location.reload();
+                            } else {
+                                alert('El pago fue procesado, pero ocurrió un error en la verificación.');
+                            }
+                        } catch (err) {
+                            console.error('Error capturando orden:', err);
+                            alert('Error al verificar el pago con PayPal.');
+                        }
+                    },
+                    onError: function (err) {
+                        console.error('PayPal Error:', err);
+                        alert('Ocurrió un error con el procesador de PayPal.');
+                    }
+                }).render('#release-paypal-container');
             }
 
 

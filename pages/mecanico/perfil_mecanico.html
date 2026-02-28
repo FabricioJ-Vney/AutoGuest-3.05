@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perfil del Mecánico - AutoGuest</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="../../style.css">
+    <style>
+        body {
+            background-color: #202020;
+            color: #ffffff;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        .portal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 40px;
+            background-color: #1a1a1a;
+            border-bottom: 1px solid #333;
+        }
+
+        .portal-header .logo {
+            width: 120px;
+        }
+
+        .header-info {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .back-btn {
+            background: none;
+            border: 1px solid #f39c12;
+            color: #f39c12;
+            padding: 8px 16px;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background-color: #f39c12;
+            color: #1a1a1a;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 30px;
+            background: #2c2c2c;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            text-align: center;
+        }
+
+        h1 {
+            color: #f39c12;
+            margin-bottom: 30px;
+            border-bottom: 1px solid #444;
+            padding-bottom: 15px;
+        }
+
+        .profile-pic-container {
+            width: 150px;
+            height: 150px;
+            margin: 0 auto 20px auto;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 3px solid #f39c12;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #444;
+        }
+
+        .profile-pic-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            text-align: left;
+            margin-bottom: 30px;
+        }
+
+        .info-box {
+            background: #1a1a1a;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #f39c12;
+        }
+
+        .info-box label {
+            display: block;
+            color: #a0a0a0;
+            font-size: 0.9em;
+            margin-bottom: 5px;
+        }
+
+        .info-box p {
+            margin: 0;
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #fff;
+        }
+
+        .taller-section {
+            background: #1e1e1e;
+            padding: 25px;
+            border-radius: 8px;
+            border: 1px dashed #555;
+            text-align: left;
+        }
+
+        .taller-section h3 {
+            color: #f39c12;
+            margin-top: 0;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            background: #333;
+            border: 1px solid #555;
+            color: white;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        .btn {
+            background: #f39c12;
+            color: #1a1a1a;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            width: 100%;
+            transition: background 0.3s;
+        }
+
+        .btn:hover {
+            background: #e67e22;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            font-weight: bold;
+            background: #2ecc71;
+            color: #1a1a1a;
+            margin-left: 10px;
+        }
+
+        @media(max-width: 600px) {
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header class="portal-header">
+        <a href="../../portal_mecanico.html">
+            <img src="../../imagenes/Logo_Autoguest.png" alt="Logo de AutoGuest" class="logo">
+        </a>
+        <div class="header-info">
+            <a href="../../portal_mecanico.html" class="back-btn"><i class="fas fa-arrow-left"></i> Volver al Panel</a>
+        </div>
+    </header>
+
+    <div class="container">
+        <h1>Mi Perfil</h1>
+
+        <div class="profile-pic-container" style="position: relative;">
+            <img id="profileImage" src="https://ui-avatars.com/api/?name=M&background=333&color=f39c12&size=150"
+                alt="Foto de Perfil">
+            <label for="fotoInput"
+                style="position: absolute; bottom: 0; background: rgba(0,0,0,0.6); width: 100%; cursor: pointer; padding: 5px 0; font-size: 0.8em; color: #f39c12;">
+                <i class="fas fa-camera"></i> Cambiar
+            </label>
+            <input type="file" id="fotoInput" accept="image/*" style="display: none;">
+        </div>
+        <h2 id="mecanicoNombre" style="margin-top: 5px;">Cargando...</h2>
+
+        <div class="info-grid">
+            <div class="info-box">
+                <label><i class="fas fa-envelope"></i> Correo Electrónico</label>
+                <p id="mecanicoEmail">-</p>
+            </div>
+            <div class="info-box">
+                <label><i class="fas fa-phone"></i> Número de Contacto</label>
+                <p id="mecanicoTelefono">-</p>
+            </div>
+            <div class="info-box">
+                <label><i class="fas fa-tools"></i> Especialidad</label>
+                <p id="mecanicoEspecialidad">-</p>
+            </div>
+            <div class="info-box" style="background: #2c3e50; border-left-color: #3498db;">
+                <label style="color: #b8cddb;"><i class="fas fa-warehouse"></i> Taller Actual</label>
+                <p id="mecanicoTallerNombre">-</p>
+                <label style="margin-top:5px; color:#b8cddb;">ID: <span id="mecanicoTallerId"
+                        style="color:white; font-weight:normal;">-</span></label>
+            </div>
+        </div>
+
+        <div class="taller-section">
+            <h3><i class="fas fa-exchange-alt"></i> Cambiar de Taller</h3>
+            <p style="color: #aaa; font-size: 0.9em; margin-bottom: 15px;">
+                Si te cambiaste de taller, ingresa el ID del nuevo taller. Tu solicitud pasará a estado "Pendiente"
+                hasta que el nuevo administrador la apruebe.
+            </p>
+            <form id="cambiarTallerForm">
+                <div class="form-group">
+                    <input type="text" id="nuevoIdTaller" class="form-control" placeholder="Ej: T01" required>
+                </div>
+                <button type="submit" class="btn">Solicitar Cambio de Taller</button>
+            </form>
+        </div>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            if (!sessionStorage.getItem('userName') || sessionStorage.getItem('userRole') !== 'mecanico') {
+                window.location.href = '../../login_mecanico.html';
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/mecanico/perfil');
+                if (res.ok) {
+                    const data = await res.json();
+
+                    document.getElementById('mecanicoNombre').textContent = data.nombre;
+                    document.getElementById('mecanicoEmail').textContent = data.email;
+                    document.getElementById('mecanicoTelefono').textContent = data.telefono;
+                    document.getElementById('mecanicoEspecialidad').textContent = data.especialidad || 'General';
+
+                    document.getElementById('mecanicoTallerNombre').textContent = data.tallerNombre;
+                    document.getElementById('mecanicoTallerId').textContent = data.idTaller;
+
+                    if (data.foto_perfil) {
+                        document.getElementById('profileImage').src = data.foto_perfil;
+                    } else {
+                        const initial = data.nombre.charAt(0).toUpperCase();
+                        document.getElementById('profileImage').src = `https://ui-avatars.com/api/?name=${initial}&background=333&color=f39c12&size=150`;
+                    }
+
+                } else {
+                    alert('Error cargando perfil');
+                }
+            } catch (err) {
+                console.error(err);
+            }
+
+            // Manejo de cambio de foto
+            const fotoInput = document.getElementById('fotoInput');
+            const profileImage = document.getElementById('profileImage');
+
+            fotoInput.addEventListener('change', async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = async (evt) => {
+                    const base64 = evt.target.result;
+                    profileImage.src = base64; // Cambio visual previo
+
+                    try {
+                        const res = await fetch('/api/perfil', {
+                            method: 'PUT',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ foto_perfil: base64 })
+                        });
+                        if (res.ok) {
+                            alert('Foto de perfil actualizada');
+                        } else {
+                            alert('Error al guardar la foto');
+                        }
+                    } catch (err) {
+                        console.error(err);
+                        alert('Error de conexión');
+                    }
+                };
+                reader.readAsDataURL(file);
+            });
+        });
+
+        document.getElementById('cambiarTallerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const nuevoIdTaller = document.getElementById('nuevoIdTaller').value.trim();
+
+            if (!confirm(`¿Estás seguro de solicitar el cambio al taller ${nuevoIdTaller}? Tu cuenta quedará inactiva hasta que el nuevo taller te apruebe.`)) {
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/mecanico/cambiar-taller', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ idTaller: nuevoIdTaller })
+                });
+
+                const data = await res.json();
+                if (res.ok) {
+                    alert('Solicitud enviada correctamente. Espera a que el nuevo administrador la apruebe.');
+                    // Cerrar sesión ya que pasará a PENDIENTE
+                    sessionStorage.clear();
+                    localStorage.clear();
+                    window.location.href = '../../login_mecanico.html';
+                } else {
+                    alert(data.mensaje || 'Error al cambiar de taller');
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Error de conexión');
+            }
+        });
+    </script>
+    <script src="http://localhost:3000/js/global_nav.js"></script>
+</body>
+
+</html>

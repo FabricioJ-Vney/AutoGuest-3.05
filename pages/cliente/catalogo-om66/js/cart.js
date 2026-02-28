@@ -250,8 +250,13 @@ checkoutButton.addEventListener('click', () => {
                     paymentModal.style.display = 'none';
 
                     // Redirigir a ticket de confirmación
+                    const urlParamsCart = new URLSearchParams(window.location.search);
+                    const idTallerCart = urlParamsCart.get('idTaller');
+                    let redirectUrl = `../ticket_confirmacion.html?idTicket=${result.idTicket}`;
+                    if (idTallerCart) redirectUrl += `&idTaller=${idTallerCart}`;
+
                     if (result.idTicket) {
-                        window.location.href = `../ticket_confirmacion.html?idTicket=${result.idTicket}`;
+                        window.location.href = redirectUrl;
                     } else {
                         window.open(`${baseUrl}/api/pedidos/${result.idPedido}/ticket`, '_blank');
                         location.reload();

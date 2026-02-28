@@ -284,6 +284,7 @@
                 <table class="appointments-table" id="appointmentsTable">
                     <thead>
                         <tr>
+                            <th>ID Cita</th>
                             <th>Fecha y Hora</th>
                             <th>Cliente</th>
                             <th>Vehículo</th>
@@ -295,7 +296,7 @@
                     <tbody id="appointmentsTableBody">
                         <!-- Las citas se cargarán aquí dinámicamente -->
                         <tr>
-                            <td colspan="6">Cargando citas...</td>
+                            <td colspan="7">Cargando citas...</td>
                         </tr>
                     </tbody>
                 </table>
@@ -332,11 +333,13 @@
                 <h2>Chat con Cliente (Solo Lectura)</h2>
                 <button class="close-btn" id="closeChatModalBtn">&times;</button>
             </div>
-            <div id="chatMessages" style="height: 300px; overflow-y: auto; background: #1a1a1a; padding: 15px; border-radius: 8px; margin-bottom: 20px; display: flex; flex-direction: column; gap: 10px;">
+            <div id="chatMessages"
+                style="height: 300px; overflow-y: auto; background: #1a1a1a; padding: 15px; border-radius: 8px; margin-bottom: 20px; display: flex; flex-direction: column; gap: 10px;">
                 <!-- Messages go here -->
                 <p style="color:#aaa; text-align:center;">Cargando mensajes...</p>
             </div>
-            <div style="background: rgba(243, 156, 18, 0.1); padding: 10px; border-radius: 5px; border-left: 3px solid #f39c12; color: #f0f0f0; font-size: 0.9em;">
+            <div
+                style="background: rgba(243, 156, 18, 0.1); padding: 10px; border-radius: 5px; border-left: 3px solid #f39c12; color: #f0f0f0; font-size: 0.9em;">
                 <i class="fas fa-info-circle" style="color: #f39c12; margin-right: 5px;"></i>
                 Como administrador del taller, solo puedes supervisar esta conversación.
             </div>

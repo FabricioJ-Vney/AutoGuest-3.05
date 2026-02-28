@@ -94,7 +94,7 @@ router.get('/resenas', isAuthenticated, async (req, res) => {
 
         // Obtener reseñas del taller
         const [resenas] = await db.query(`
-            SELECT r.idResena, r.calificacion, r.comentario, r.fecha,
+            SELECT r.idResena, r.calificacion, r.comentario, r.fecha, r.respuesta_taller,
                    u.nombre as clienteNombre
             FROM resenas r
             JOIN usuario u ON r.idUsuario = u.idUsuario
@@ -110,13 +110,36 @@ router.get('/resenas', isAuthenticated, async (req, res) => {
     }
 });
 
+// @route   PUT /api/taller/resenas/:id/responder
+// @desc    Responder a una reseña
+// @access  Private (Admin)
+router.put('/resenas/:id/responder', isAuthenticated, async (req, res) => {
+    try {
+        const { respuesta } = req.body;
+        const idResena = req.params.id;
+
+        const [admin] = await db.query('SELECT idTaller FROM administrador WHERE idUsuario = ?', [req.session.userId]);
+        if (!admin || admin.length === 0) return res.status(404).json({ error: 'Taller no encontrado' });
+
+        // Ensure review belongs to this taller
+        const [resena] = await db.query('SELECT idResena FROM resenas WHERE idResena = ? AND idTaller = ?', [idResena, admin[0].idTaller]);
+        if (!resena || resena.length === 0) return res.status(404).json({ error: 'Reseña no encontrada o no pertenece a este taller' });
+
+        await db.query('UPDATE resenas SET respuesta_taller = ? WHERE idResena = ?', [respuesta, idResena]);
+        res.json({ success: true, message: 'Respuesta guardada con éxito' });
+    } catch (error) {
+        console.error('Error al responder reseña:', error);
+        res.status(500).json({ error: 'Error al guardar respuesta' });
+    }
+});
+
 // @route   GET /api/taller/info
 // @desc    Obtener información básica del taller (ID para compartir)
 // @access  Private (Admin)
 router.get('/info', isAuthenticated, async (req, res) => {
     try {
         const [admin] = await db.query(`
-            SELECT t.idTaller, t.nombre, t.direccion, t.foto_perfil
+            SELECT t.idTaller, t.nombre, t.direccion, t.foto_perfil, t.telefono_contacto, t.redes_sociales
             FROM administrador a
             JOIN taller t ON a.idTaller = t.idTaller
             WHERE a.idUsuario = ?
@@ -128,6 +151,57 @@ router.get('/info', isAuthenticated, async (req, res) => {
     } catch (error) {
         console.error('Error info:', error);
         res.status(500).json({ error: 'Error al obtener información' });
+    }
+});
+
+// @route   GET /api/taller/perfil
+// @desc    Obtener perfil completo del taller
+// @access  Private (Admin)
+router.get('/perfil', isAuthenticated, async (req, res) => {
+    try {
+        const [admin] = await db.query(`
+            SELECT t.idTaller, t.nombre, t.foto_perfil, t.link_maps, t.telefono_contacto, t.redes_sociales
+            FROM administrador a
+            JOIN taller t ON a.idTaller = t.idTaller
+            WHERE a.idUsuario = ?
+        `, [req.session.userId]);
+
+        if (!admin || admin.length === 0) return res.status(404).json({ error: 'Taller no encontrado' });
+
+        res.json(admin[0]);
+    } catch (error) {
+        console.error('Error perfil:', error);
+        res.status(500).json({ error: 'Error al obtener perfil' });
+    }
+});
+
+// @route   PUT /api/taller/perfil
+// @desc    Actualizar perfil completo del taller
+// @access  Private (Admin)
+router.put('/perfil', isAuthenticated, async (req, res) => {
+    try {
+        const { nombre, link_maps, foto_perfil, telefono_contacto, redes_sociales } = req.body;
+
+        const [admin] = await db.query('SELECT idTaller FROM administrador WHERE idUsuario = ?', [req.session.userId]);
+        if (!admin || admin.length === 0) return res.status(404).json({ error: 'Taller no encontrado' });
+
+        let query = 'UPDATE taller SET nombre = ?, link_maps = ?, telefono_contacto = ?, redes_sociales = ?';
+        let params = [nombre || '', link_maps || '', telefono_contacto || '', redes_sociales || ''];
+
+        if (foto_perfil) {
+            query += ', foto_perfil = ?';
+            params.push(foto_perfil);
+        }
+
+        query += ' WHERE idTaller = ?';
+        params.push(admin[0].idTaller);
+
+        await db.query(query, params);
+
+        res.json({ success: true, message: 'Perfil actualizado exitosamente' });
+    } catch (error) {
+        console.error('Error al actualizar perfil:', error);
+        res.status(500).json({ error: 'Error al actualizar perfil' });
     }
 });
 
@@ -187,8 +261,8 @@ router.put('/mecanicos/:id/aprobar', isAuthenticated, async (req, res) => {
 
         // Notificar al mecánico
         await db.query(
-            'INSERT INTO notificacion (idUsuario, titulo, mensaje) VALUES (?, ?, ?)',
-            [idMecanico, '¡Solicitud Aprobada!', 'Tu solicitud para unirte al taller ha sido aprobada. Ya puedes ingresar al portal de mecánicos.']
+            'INSERT INTO notificacion (idUsuario, titulo, mensaje, tipo) VALUES (?, ?, ?, ?)',
+            [idMecanico, '¡Solicitud Aprobada!', 'Tu solicitud para unirte al taller ha sido aprobada. Ya puedes ingresar al portal de mecánicos.', 'cita']
         );
 
         res.json({ success: true, message: 'Mecánico aprobado exitosamente.' });
@@ -223,8 +297,8 @@ router.put('/mecanicos/:id/remover', isAuthenticated, async (req, res) => {
 
         // 3. Notificar al mecánico
         await connection.query(
-            'INSERT INTO notificacion (idUsuario, titulo, mensaje) VALUES (?, ?, ?)',
-            [idMecanico, 'Baja del Taller', 'Has sido dado de baja del taller. Ya no tienes acceso a sus citas ni servicios.']
+            'INSERT INTO notificacion (idUsuario, titulo, mensaje, tipo) VALUES (?, ?, ?, ?)',
+            [idMecanico, 'Baja del Taller', 'Has sido dado de baja del taller. Ya no tienes acceso a sus citas ni servicios.', 'cita']
         );
 
         await connection.commit();
@@ -236,6 +310,82 @@ router.put('/mecanicos/:id/remover', isAuthenticated, async (req, res) => {
         res.status(500).json({ error: 'Error al remover mecánico' });
     } finally {
         if (connection) connection.release();
+    }
+});
+
+// ==========================================
+// PUNTO DE VENTA (POS)
+// ==========================================
+
+// @route   POST /api/taller/pos/venta
+// @desc    Registrar venta física de un producto (reduce stock)
+// @access  Private (Admin)
+router.post('/pos/venta', isAuthenticated, async (req, res) => {
+    let connection;
+    try {
+        const { idItem, cantidad } = req.body;
+        if (!idItem || !cantidad || cantidad <= 0) return res.status(400).json({ error: 'Datos inválidos' });
+
+        const [admin] = await db.query('SELECT idTaller FROM administrador WHERE idUsuario = ?', [req.session.userId]);
+        if (!admin || admin.length === 0) return res.status(404).json({ error: 'Taller no encontrado' });
+
+        connection = await db.getConnection();
+        await connection.beginTransaction();
+
+        const [item] = await connection.query('SELECT stock, nombre, precio FROM iteminventario WHERE idItem = ? AND idTaller = ? FOR UPDATE', [idItem, admin[0].idTaller]);
+
+        if (!item || item.length === 0) {
+            await connection.rollback();
+            return res.status(404).json({ error: 'Producto no encontrado en tu inventario' });
+        }
+
+        if (item[0].stock < cantidad) {
+            await connection.rollback();
+            return res.status(400).json({ error: 'Stock insuficiente' });
+        }
+
+        await connection.query('UPDATE iteminventario SET stock = stock - ? WHERE idItem = ?', [cantidad, idItem]);
+
+        await connection.commit();
+        res.json({ success: true, message: 'Venta registrada con éxito', item: item[0] });
+
+    } catch (error) {
+        if (connection) await connection.rollback();
+        console.error('Error en POS venta:', error);
+        res.status(500).json({ error: 'Error al registrar venta' });
+    } finally {
+        if (connection) connection.release();
+    }
+});
+
+// @route   POST /api/taller/pos/cita/:id/cobrar
+// @desc    Generar código de cobro en efectivo para una cita
+// @access  Private (Admin)
+router.post('/pos/cita/:id/cobrar', isAuthenticated, async (req, res) => {
+    try {
+        const idCita = req.params.id;
+        const [admin] = await db.query('SELECT idTaller FROM administrador WHERE idUsuario = ?', [req.session.userId]);
+        if (!admin || admin.length === 0) return res.status(404).json({ error: 'Taller no encontrado' });
+
+        const [cita] = await db.query('SELECT estado FROM cita WHERE idCita = ? AND idTaller = ?', [idCita, admin[0].idTaller]);
+        if (!cita || cita.length === 0) return res.status(404).json({ error: 'Cita no encontrada o no pertenece a tu taller' });
+
+        if (cita[0].estado !== 'Esperando Confirmacion Cliente') {
+            return res.status(400).json({ error: 'La cita debe estar en estado Esperando Confirmacion Cliente para cobrar en persona.' });
+        }
+
+        // Generar código alfanumérico corto (ej. 6 caracteres)
+        const { customAlphabet } = require('nanoid');
+        const nanoidShort = customAlphabet('1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ', 6);
+        const codigo = nanoidShort();
+
+        await db.query('UPDATE cita SET codigo_pago_efectivo = ? WHERE idCita = ?', [codigo, idCita]);
+
+        res.json({ success: true, codigo, message: 'Código generado con éxito' });
+
+    } catch (error) {
+        console.error('Error al generar código POS Cita:', error);
+        res.status(500).json({ error: 'Error al generar código de cobro' });
     }
 });
 

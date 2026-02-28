@@ -11,16 +11,16 @@ const isAuthenticated = (req, res, next) => {
     }
 };
 
-// Obtener todas las notificaciones del usuario actual
 router.get('/', isAuthenticated, async (req, res) => {
-    const idUsuario = req.session.userId; // Puede ser de cliente, mecánico
+    const idUsuario = req.session.userId;
+
     if (!idUsuario) {
         return res.status(400).json({ error: 'No se pudo identificar al usuario' });
     }
 
     try {
         const [notificaciones] = await db.query(
-            'SELECT * FROM notificacion WHERE idUsuario = ? ORDER BY fechaCreacion DESC LIMIT 50',
+            'SELECT * FROM notificacion WHERE idUsuario = ? AND leida = FALSE ORDER BY fechaCreacion DESC LIMIT 20',
             [idUsuario]
         );
         res.json(notificaciones);
@@ -44,6 +44,22 @@ router.put('/:id/leer', isAuthenticated, async (req, res) => {
     } catch (error) {
         console.error('Error al marcar notificación:', error);
         res.status(500).json({ error: 'Error al marcar notificación' });
+    }
+});
+
+// Marcar todas las notificaciones como leídas
+router.put('/leer-todas', isAuthenticated, async (req, res) => {
+    const idUsuario = req.session.userId;
+
+    try {
+        await db.query(
+            'UPDATE notificacion SET leida = TRUE WHERE idUsuario = ? AND leida = FALSE',
+            [idUsuario]
+        );
+        res.json({ success: true, message: 'Todas las notificaciones marcadas como leídas' });
+    } catch (error) {
+        console.error('Error al marcar todas como leídas:', error);
+        res.status(500).json({ error: 'Error al procesar la solicitud' });
     }
 });
 

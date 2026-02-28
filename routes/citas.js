@@ -72,10 +72,10 @@ router.post('/', isAuthenticated, async (req, res) => {
         const idCita = 'CIT' + nanoid(5);
         const fechaHora = `${fecha} ${hora}:00`;
 
-        // 3. Insertar con idTaller
+        // 3. Insertar con idTaller y servicio_solicitado
         await db.query(
-            'INSERT INTO cita (idCita, fechaHora, estado, idCliente, idVehiculo, idMecanico, idTaller) VALUES (?, ?, ?, ?, ?, ?, ?)',
-            [idCita, fechaHora, 'Pendiente', idCliente, idVehiculo, idMecanico, idTaller]
+            'INSERT INTO cita (idCita, fechaHora, estado, idCliente, idVehiculo, idMecanico, idTaller, servicio_solicitado) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+            [idCita, fechaHora, 'Pendiente', idCliente, idVehiculo, idMecanico, idTaller, servicio]
         );
 
         res.json({ success: true, message: 'Cita agendada con éxito', idCita });
@@ -348,6 +348,95 @@ router.get('/:id/cotizacion', isAuthenticated, async (req, res) => {
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'Error al obtener cotización' });
+    }
+});
+
+// Confirmar entrega con código de efectivo
+router.put('/:id/confirmar-entrega-codigo', isAuthenticated, async (req, res) => {
+    const { id } = req.params;
+    const { codigo } = req.body;
+    try {
+        const [cita] = await db.query('SELECT estado, codigo_pago_efectivo FROM cita WHERE idCita = ?', [id]);
+        if (cita.length === 0) return res.status(404).json({ error: 'Cita no encontrada' });
+
+        if (cita[0].estado !== 'Esperando Confirmacion Cliente') {
+            return res.status(400).json({ error: 'La cita no está en estado de liberar.' });
+        }
+
+        if (cita[0].codigo_pago_efectivo !== codigo) {
+            return res.status(400).json({ error: 'Código de pago incorrecto.' });
+        }
+
+        await db.query('UPDATE cita SET estado = "Completado" WHERE idCita = ?', [id]);
+        res.json({ message: 'Vehículo liberado correctamente con pago en efectivo.' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Error al confirmar la entrega' });
+    }
+});
+
+// Confirmar entrega con pago online
+router.put('/:id/confirmar-entrega-online', isAuthenticated, async (req, res) => {
+    const { id } = req.params;
+    try {
+        await db.query('UPDATE cita SET estado = "Completado" WHERE idCita = ?', [id]);
+        res.json({ message: 'Vehículo liberado correctamente con pago en línea.' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Error al confirmar la entrega' });
+    }
+});
+// Confirmar entrega (cliente)
+router.put('/:id/confirmar-entrega', isAuthenticated, async (req, res) => {
+    const { id } = req.params;
+    const idCliente = req.session.userId;
+
+    try {
+        // Verificar que la cita pertenece al cliente y está esperando confirmación
+        const [cita] = await db.query(
+            'SELECT estado, idMecanico, idTaller FROM cita WHERE idCita = ? AND idCliente = ?',
+            [id, idCliente]
+        );
+
+        if (cita.length === 0) {
+            return res.status(404).json({ error: 'Cita no encontrada o no tienes permiso.' });
+        }
+
+        if (cita[0].estado !== 'Esperando Confirmacion Cliente') {
+            return res.status(400).json({ error: 'La cita no está esperando tu confirmación.' });
+        }
+
+        // Actualizar a Completado
+        await db.query('UPDATE cita SET estado = ? WHERE idCita = ?', ['Completado', id]);
+
+        // Notificar al mecánico y/o taller que el auto fue entregado (Opcional, pero buena práctica)
+        if (cita[0].idMecanico) {
+            await db.query(
+                'INSERT INTO notificacion (idUsuario, titulo, mensaje) VALUES (?, ?, ?)',
+                [cita[0].idMecanico, 'Entrega Confirmada', 'El cliente ha confirmado la entrega del auto de la cita ' + id + '.']
+            );
+        }
+
+        let idTallerResult = cita[0].idTaller;
+        if (!idTallerResult && cita[0].idMecanico) {
+            const [mec] = await db.query('SELECT idTaller FROM mecanico WHERE idUsuario = ?', [cita[0].idMecanico]);
+            if (mec.length > 0) idTallerResult = mec[0].idTaller;
+        }
+
+        if (idTallerResult) {
+            const [admins] = await db.query('SELECT idUsuario FROM administrador WHERE idTaller = ?', [idTallerResult]);
+            if (admins.length > 0) {
+                await db.query(
+                    'INSERT INTO notificacion (idUsuario, titulo, mensaje) VALUES (?, ?, ?)',
+                    [admins[0].idUsuario, 'Entrega Confirmada', 'El cliente ha confirmado la entrega del auto de la cita ' + id + '.']
+                );
+            }
+        }
+
+        res.json({ success: true, message: 'Entrega confirmada. La cita ha sido completada exitosamente.' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Error al confirmar la entrega' });
     }
 });
 

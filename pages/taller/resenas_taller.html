@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reseñas - Portal de Taller</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="../../style.css">
+    <style>
+        body {
+            background-color: #202020;
+            color: #fff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .portal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 40px;
+            background-color: #1a1a1a;
+            border-bottom: 1px solid #333;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .logo {
+            width: 120px;
+        }
+
+        .back-link {
+            color: #ccc;
+            text-decoration: none;
+            font-size: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .back-link:hover {
+            color: #f39c12;
+        }
+
+        .page-container {
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .page-title {
+            font-size: 2.2em;
+            border-bottom: 1px solid #444;
+            padding-bottom: 15px;
+            margin-bottom: 30px;
+        }
+
+        .review-card {
+            background-color: #2c2c2c;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        .review-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .review-author {
+            font-weight: bold;
+            font-size: 1.1em;
+            color: #f39c12;
+        }
+
+        .review-date {
+            color: #aaa;
+            font-size: 0.9em;
+        }
+
+        .stars {
+            color: #f1c40f;
+            font-size: 1.2em;
+            margin-bottom: 10px;
+        }
+
+        .review-text {
+            color: #e0e0e0;
+            line-height: 1.5;
+            margin-bottom: 15px;
+        }
+
+        .taller-reply {
+            background-color: #1a1a1a;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #f39c12;
+            margin-top: 15px;
+        }
+
+        .taller-reply-title {
+            font-weight: bold;
+            color: #f39c12;
+            margin-bottom: 5px;
+            font-size: 0.9em;
+        }
+
+        .taller-reply-text {
+            color: #ccc;
+            font-size: 0.95em;
+        }
+
+        .reply-form {
+            margin-top: 15px;
+            display: none;
+        }
+
+        .reply-textarea {
+            width: 100%;
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid #444;
+            background: #1a1a1a;
+            color: #fff;
+            font-family: inherit;
+            margin-bottom: 10px;
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .btn-reply {
+            background-color: #f39c12;
+            color: #1a1a1a;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+
+        .btn-reply:hover {
+            background-color: #e67e22;
+        }
+
+        .btn-toggle-reply {
+            background: none;
+            border: 1px solid #f39c12;
+            color: #f39c12;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .btn-toggle-reply:hover {
+            background: #f39c12;
+            color: #1a1a1a;
+        }
+    </style>
+</head>
+
+<body>
+    <header class="portal-header">
+        <div class="header-left">
+            <a href="../../portal_taller.html"><img src="../../imagenes/Logo_Autoguest.png" alt="AutoGuest"
+                    class="logo"></a>
+            <a href="../../portal_taller.html" class="back-link"><i class="fas fa-arrow-left"></i> Volver al Panel</a>
+        </div>
+        <div class="header-info" style="text-align:right;">
+            <h2 id="workshopName" style="margin:0; font-size:1.2em;">Taller</h2>
+            <p style="margin:0; font-size:0.9em; color:#a0a0a0;">Gestión de Reseñas</p>
+        </div>
+    </header>
+
+    <main class="page-container">
+        <h1 class="page-title">Valoraciones de Clientes</h1>
+        <div id="reviews-container">
+            <p style="color: #aaa;">Cargando reseñas...</p>
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const isLoggedIn = sessionStorage.getItem('isLoggedIn');
+            const userRole = sessionStorage.getItem('userRole');
+            if (!isLoggedIn || userRole !== 'taller') {
+                alert('Acceso denegado');
+                window.location.href = '../../login_taller.html';
+                return;
+            }
+
+            const tallerName = sessionStorage.getItem('tallerName');
+            if (tallerName) document.getElementById('workshopName').textContent = tallerName;
+
+            cargarResenas();
+        });
+
+        async function cargarResenas() {
+            const container = document.getElementById('reviews-container');
+            try {
+                const res = await fetch('/api/taller/resenas');
+                if (!res.ok) throw new Error('Error al obtener reseñas');
+                const data = await res.json();
+
+                if (data.length === 0) {
+                    container.innerHTML = '<p style="color:#aaa; text-align:center;">Aún no tienes reseñas.</p>';
+                    return;
+                }
+
+                container.innerHTML = data.map(r => renderResena(r)).join('');
+            } catch (e) {
+                console.error(e);
+                container.innerHTML = '<p style="color:red;">Error al cargar reseñas.</p>';
+            }
+        }
+
+        function renderResena(r) {
+            const fecha = new Date(r.fecha).toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' });
+            let starsHtml = '';
+            for (let i = 0; i < 5; i++) {
+                starsHtml += `<i class="fa${i < r.calificacion ? 's' : 'r'} fa-star"></i>`;
+            }
+
+            let replySection = '';
+            if (r.respuesta_taller) {
+                replySection = `
+                    <div class="taller-reply">
+                        <div class="taller-reply-title"><i class="fas fa-reply"></i> Tu respuesta:</div>
+                        <div class="taller-reply-text">${r.respuesta_taller}</div>
+                    </div>
+                `;
+            } else {
+                replySection = `
+                    <button class="btn-toggle-reply" onclick="toggleReplyForm(${r.idResena})"><i class="fas fa-comment-dots"></i> Responder</button>
+                    <div class="reply-form" id="replyForm-${r.idResena}">
+                        <textarea id="replyText-${r.idResena}" class="reply-textarea" placeholder="Escribe tu respuesta aquí..."></textarea>
+                        <button class="btn-reply" onclick="enviarRespuesta(${r.idResena})">Enviar Respuesta</button>
+                    </div>
+                `;
+            }
+
+            return `
+                <div class="review-card">
+                    <div class="review-header">
+                        <div class="review-author"><i class="fas fa-user"></i> ${r.clienteNombre}</div>
+                        <div class="review-date">${fecha}</div>
+                    </div>
+                    <div class="stars">${starsHtml}</div>
+                    <div class="review-text">${r.comentario || '<em>Sin comentario</em>'}</div>
+                    ${replySection}
+                </div>
+            `;
+        }
+
+        function toggleReplyForm(id) {
+            const form = document.getElementById(`replyForm-${id}`);
+            form.style.display = form.style.display === 'block' ? 'none' : 'block';
+        }
+
+        async function enviarRespuesta(id) {
+            const textarea = document.getElementById(`replyText-${id}`);
+            const respuesta = textarea.value.trim();
+            if (!respuesta) return alert('Por favor, escribe una respuesta.');
+
+            try {
+                const res = await fetch(`/api/taller/resenas/${id}/responder`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ respuesta })
+                });
+
+                if (res.ok) {
+                    alert('Respuesta enviada.');
+                    cargarResenas();
+                } else {
+                    alert('Error al enviar la respuesta.');
+                }
+            } catch (e) {
+                console.error(e);
+                alert('Error de conexión.');
+            }
+        }
+    </script>
+</body>
+
+</html>

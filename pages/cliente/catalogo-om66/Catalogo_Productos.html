@@ -18,20 +18,20 @@
         <div
             style="display: flex; justify-content: space-between; align-items: center; padding: 15px; background-color: #1a1a1a; border-radius: 12px; margin-bottom: 20px;">
             <div style="display: flex; align-items: center; gap: 20px; flex: 1;">
-                <a href="../dashboard_cliente.html"
+                <a href="javascript:history.back()"
                     style="color: #f39c12; text-decoration: none; font-size: 1.5em; transition: 0.3s;"
-                    title="Volver al Panel">
+                    title="Volver a la página anterior">
                     <i class="fas fa-arrow-left"></i>
                 </a>
-                <a href="../dashboard_cliente.html">
+                <a href="javascript:history.back()">
                     <img src="../../../imagenes/Logo_Autoguest.png" alt="Logo AutoGuest" width="110"
                         style="cursor: pointer;">
                 </a>
             </div>
 
             <div style="flex: 2; text-align: center;">
-                <h1 style="margin: 0; font-size: 2.2em; font-weight: 800; line-height: 1.2;">Catálogo de Productos
-                    OM<sup>66</sup> Evolution</h1>
+                <h1 id="catalog-title" style="margin: 0; font-size: 2.2em; font-weight: 800; line-height: 1.2;">Catálogo
+                    de Productos</h1>
                 <p style="margin: 5px 0 0; font-size: 1.1em; opacity: 0.9;">Calidad y rendimiento para tu vehículo.</p>
             </div>
 
@@ -57,8 +57,8 @@
     </main>
     <footer>
         <h2>¿Interesado en nuestros productos?</h2>
-        <p>Contáctanos por WhatsApp para hacer tu pedido: <strong>+52 9991287457</strong></p>
-        <p>&copy; 2023 Productos Automotrices OM 66.</p>
+        <p>Contáctanos por WhatsApp para hacer tu pedido: <strong id="footer-whatsapp">+52 9991287457</strong></p>
+        <p id="footer-copyright">&copy; 2023 Productos Automotrices OM 66.</p>
     </footer>
 
     <div id="cart-modal" class="modal">
@@ -90,32 +90,7 @@
             <div id="paypal-button-container" style="margin-top: 20px;"></div>
         </div>
     </div>
-    <div id="restock-modal" class="modal">
-        <div class="modal-content">
-            <span class="close-buttons-restock"
-                style="color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer;">&times;</span>
-            <h2>Reabastecer Producto</h2>
-            <p id="restock-product-name"></p>
-            <form id="restock-form">
-                <input type="hidden" id="restock-product-id">
-                <label for="restock-email">Email del Taller:</label>
-                <input type="email" id="restock-email" required placeholder="correo@taller.com"
-                    style="width: 100%; padding: 10px; margin-bottom: 10px;">
 
-                <label for="restock-password">Contraseña:</label>
-                <input type="password" id="restock-password" required placeholder="********"
-                    style="width: 100%; padding: 10px; margin-bottom: 10px;">
-
-                <label for="restock-quantity">Cantidad a agregar:</label>
-                <input type="number" id="restock-quantity" required min="1" value="10"
-                    style="width: 100%; padding: 10px; margin-bottom: 20px;">
-
-                <button type="submit"
-                    style="width: 100%; padding: 10px; background-color: #28a745; color: white; border: none; cursor: pointer;">Confirmar
-                    Reabastecimiento</button>
-            </form>
-        </div>
-    </div>
 
     <script src="js/cart.js"></script>
     <script>
@@ -123,21 +98,43 @@
 
         document.addEventListener('DOMContentLoaded', async () => {
             const productosContainer = document.querySelector('.productos-container');
-            const restockModal = document.getElementById('restock-modal');
-            const closeRestockBtn = document.querySelector('.close-buttons-restock');
-            const restockForm = document.getElementById('restock-form');
-
-            // Close modal events
-            closeRestockBtn.onclick = () => restockModal.style.display = "none";
+            // Close modal events for shopping cart and payment are handled in cart.js
             window.onclick = (event) => {
-                if (event.target == restockModal) {
-                    restockModal.style.display = "none";
-                }
+                const cartModal = document.getElementById('cart-modal');
+                const paymentModal = document.getElementById('payment-modal');
+                if (event.target == cartModal) cartModal.style.display = "none";
+                if (event.target == paymentModal) paymentModal.style.display = "none";
             };
 
             async function loadProducts() {
                 try {
-                    const response = await fetch(`${API_URL}/api/inventario`, {
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const idTaller = urlParams.get('idTaller');
+                    const fetchUrl = idTaller ? `${API_URL}/api/inventario?idTaller=${idTaller}` : `${API_URL}/api/inventario`;
+                    const titleElement = document.getElementById('catalog-title');
+                    const footerWhatsapp = document.getElementById('footer-whatsapp');
+                    const footerCopyright = document.getElementById('footer-copyright');
+
+                    if (idTaller) {
+                        try {
+                            const tallerRes = await fetch(`${API_URL}/api/talleres/${idTaller}`);
+                            if (tallerRes.ok) {
+                                const tallerData = await tallerRes.json();
+                                titleElement.textContent = `Catálogo de Productos de ${tallerData.info.nombre}`;
+
+                                if (tallerData.info.telefono_contacto) {
+                                    footerWhatsapp.textContent = tallerData.info.telefono_contacto;
+                                } else {
+                                    footerWhatsapp.textContent = "No especificado";
+                                }
+                                footerCopyright.innerHTML = `&copy; ${new Date().getFullYear()} ${tallerData.info.nombre}.`;
+                            }
+                        } catch (err) {
+                            console.error("Error obteniendo nombre del taller", err);
+                        }
+                    }
+
+                    const response = await fetch(fetchUrl, {
                         headers: {
                             'Authorization': 'Bearer ' + localStorage.getItem('token'),
                             'Content-Type': 'application/json'
@@ -146,12 +143,19 @@
                     });
                     const products = await response.json();
 
+                    // Sort products: in-stock first, out-of-stock last
+                    products.sort((a, b) => {
+                        if (a.stock > 0 && b.stock <= 0) return -1;
+                        if (a.stock <= 0 && b.stock > 0) return 1;
+                        return 0;
+                    });
+
                     productosContainer.innerHTML = ''; // Clear existing content
 
                     products.forEach(product => {
                         const card = document.createElement('div');
                         card.className = 'producto-card';
-                        card.dataset.id = product.id_producto;
+                        card.dataset.id = product.idItem; // Fix: use idItem instead of id_producto
                         card.dataset.precio = product.precio;
                         card.dataset.nombre = product.nombre;
                         card.dataset.stock = product.stock;
@@ -159,25 +163,26 @@
                         // Logic for stock display
                         const isSoldOut = product.stock <= 0;
                         const stockColor = isSoldOut ? 'red' : 'green';
-                        const stockText = isSoldOut ? 'AGOTADO' : `Stock: ${product.stock}`;
-                        const buttonText = isSoldOut ? 'Reabastecer (Taller)' : 'Agregar al Carrito';
-                        // If sold out, button is enabled but triggers restock. If has stock, triggers add to cart.
-                        const buttonClass = isSoldOut ? 'restock-btn' : 'add-to-cart';
-                        const buttonStyle = isSoldOut ? 'background-color: #ff9800;' : '';
+                        const stockText = isSoldOut ? '' : `Stock: ${product.stock}`;
 
                         // Default image replacement
-                        const imgSrc = product.imagen || 'https://images.unsplash.com/photo-1615554865039-b9d9fac2dfdb?w=400&h=300&fit=crop';
+                        let imgSrc = product.imagen;
+                        // Si la imagen es una ruta relativa local, ajustarla para que cargue correctamente desde la raíz
+                        if (imgSrc && imgSrc.startsWith('uploads/')) {
+                            imgSrc = `/${imgSrc}`;
+                        } else if (!imgSrc) {
+                            imgSrc = 'https://images.unsplash.com/photo-1615554865039-b9d9fac2dfdb?w=400&h=300&fit=crop';
+                        }
 
                         card.innerHTML = `
-                            <img src="${imgSrc}" alt="${product.nombre}" style="width:100%; height:200px; object-fit:cover;">
+                            <img src="${imgSrc}" alt="Imagen del producto" style="width:100%; height:200px; object-fit:cover;">
                             <h2>${product.nombre}</h2>
-                            <p>${product.descripcion}</p>
                             <div class="precio">
                                 $${parseFloat(product.precio).toFixed(2)} 
                                 <br>
                                 <span style="font-size: 0.9em; color: ${stockColor}; font-weight: bold;">${stockText}</span>
                             </div>
-                            <button class="${buttonClass}" style="${buttonStyle}">${buttonText}</button>
+                            <button class="add-to-cart" ${isSoldOut ? 'disabled style="background-color: #555; cursor: not-allowed;"' : 'style=""'}>${isSoldOut ? 'Agotado' : 'Agregar al Carrito'}</button>
                         `;
                         productosContainer.appendChild(card);
                     });
@@ -199,55 +204,13 @@
                         const nombre = card.dataset.nombre;
                         const precio = parseFloat(card.dataset.precio);
                         const stock = parseInt(card.dataset.stock);
-                        addItemToCart(id, nombre, precio, stock);
-                    });
-                });
-
-                // Restock Buttons
-                document.querySelectorAll('.restock-btn').forEach(button => {
-                    button.addEventListener('click', () => {
-                        const card = button.closest('.producto-card');
-                        document.getElementById('restock-product-id').value = card.dataset.id;
-                        document.getElementById('restock-product-name').innerText = `Reabasteciendo: ${card.dataset.nombre}`;
-                        restockModal.style.display = "block";
+                        // Make sure we check disabled before adding (though shouldn't fire if disabled)
+                        if (!button.disabled) {
+                            addItemToCart(id, nombre, precio, stock);
+                        }
                     });
                 });
             }
-
-            // Handle Restock Form Submit
-            restockForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const id = document.getElementById('restock-product-id').value;
-                const email = document.getElementById('restock-email').value;
-                const password = document.getElementById('restock-password').value;
-                const cantidad = document.getElementById('restock-quantity').value;
-
-                try {
-                    const response = await fetch(`${API_URL}/api/inventario/${id}/restock`, {
-                        method: 'PUT',
-                        headers: {
-                            'Authorization': 'Bearer ' + localStorage.getItem('token'),
-                            'Content-Type': 'application/json'
-                        },
-                        credentials: 'include',
-                        body: JSON.stringify({ email, password, cantidad: parseInt(cantidad) })
-                    });
-
-                    const result = await response.json();
-
-                    if (response.ok) {
-                        alert(result.mensaje);
-                        restockModal.style.display = "none";
-                        restockForm.reset();
-                        loadProducts(); // Refresh list to update stock
-                    } else {
-                        alert('Error: ' + result.mensaje);
-                    }
-                } catch (error) {
-                    console.error('Error:', error);
-                    alert('Error de conexión al intentar reabastecer.');
-                }
-            });
 
             // Initial Load
             loadProducts();

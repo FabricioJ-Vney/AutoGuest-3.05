@@ -62,6 +62,62 @@
             color: #1a1a1a;
         }
 
+        /* Settings Dropdown */
+        .settings-container {
+            position: relative;
+            display: inline-block;
+        }
+
+        .settings-btn {
+            background: none;
+            border: none;
+            color: #f39c12;
+            font-size: 1.5em;
+            cursor: pointer;
+            padding: 8px;
+            transition: transform 0.3s;
+        }
+
+        .settings-btn:hover {
+            transform: rotate(90deg);
+        }
+
+        .settings-dropdown {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 100%;
+            background-color: #2c2c2c;
+            min-width: 160px;
+            box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.5);
+            z-index: 1001;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #444;
+        }
+
+        .settings-dropdown a {
+            color: white;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+            border-bottom: 1px solid #444;
+            transition: background 0.2s;
+        }
+
+        .settings-dropdown a:last-child {
+            border-bottom: none;
+        }
+
+        .settings-dropdown a:hover {
+            background-color: #f39c12;
+            color: #1a1a1a;
+        }
+
+        .settings-container.active .settings-dropdown {
+            display: block;
+        }
+
         /* Contenedor */
         .portal-container {
             max-width: 1300px;
@@ -562,6 +618,170 @@
             max-height: 90vh;
             border-radius: 8px;
         }
+
+        /* === Sistema de Notificaciones === */
+        .notification-wrapper {
+            position: relative;
+            display: inline-block;
+            margin-right: 15px;
+        }
+
+        .notification-trigger {
+            background: none;
+            border: none;
+            color: #f39c12;
+            font-size: 1.4em;
+            cursor: pointer;
+            padding: 8px;
+            position: relative;
+            transition: transform 0.2s;
+        }
+
+        .notification-trigger:hover {
+            transform: scale(1.1);
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            background-color: #e74c3c;
+            color: white;
+            border-radius: 50%;
+            padding: 2px 6px;
+            font-size: 0.6em;
+            font-weight: bold;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            border: 2px solid #1a1a1a;
+        }
+
+        .notification-dropdown {
+            display: none;
+            position: absolute;
+            top: 100%;
+            right: 0;
+            width: 320px;
+            background-color: #2c2c2c;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            border: 1px solid #444;
+            border-radius: 12px;
+            margin-top: 10px;
+            z-index: 1000;
+            overflow: hidden;
+            text-align: left;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        .notification-dropdown.active {
+            display: block;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .notification-header {
+            padding: 12px 15px;
+            background-color: #333;
+            border-bottom: 1px solid #444;
+        }
+
+        .notification-header h3 {
+            margin: 0;
+            font-size: 1em;
+            color: #f39c12;
+        }
+
+        .notification-list {
+            max-height: 350px;
+            overflow-y: auto;
+        }
+
+        .notification-item {
+            padding: 12px 15px;
+            border-bottom: 1px solid #3a3a3a;
+            display: flex;
+            gap: 12px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .notification-item:hover {
+            background-color: #3a3a3a;
+        }
+
+        .notification-item.unread {
+            background-color: rgba(243, 156, 18, 0.05);
+            border-left: 3px solid #f39c12;
+        }
+
+        .notification-icon {
+            font-size: 1.2em;
+            margin-top: 2px;
+        }
+
+        .notification-content {
+            flex: 1;
+        }
+
+        .notification-content strong {
+            display: block;
+            font-size: 0.9em;
+            color: #fff;
+            margin-bottom: 2px;
+        }
+
+        .notification-content p {
+            margin: 0;
+            font-size: 0.8em;
+            color: #aaa;
+            line-height: 1.3;
+        }
+
+        .notification-time {
+            display: block;
+            font-size: 0.7em;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .notification-empty {
+            padding: 30px 15px;
+            text-align: center;
+            color: #777;
+            font-style: italic;
+            font-size: 0.9em;
+        }
+
+        .text-danger {
+            color: #e74c3c;
+        }
+
+        .text-warning {
+            color: #f1c40f;
+        }
+
+        .text-success {
+            color: #2ecc71;
+        }
+
+        .text-info {
+            color: #3498db;
+        }
+
+        .text-primary {
+            color: #f39c12;
+        }
     </style>
 
 </head>
@@ -572,11 +792,40 @@
         <a href="#">
             <img src="imagenes/Logo_Autoguest.png" alt="Logo de AutoGuest" class="logo">
         </a>
-        <div class="header-info">
-            <h2 id="mechanicName">Panel de Mecánico</h2>
-            <p>Gestión de Servicios</p>
+        <div class="header-info" style="display: flex; align-items: center; gap: 20px;">
+            <!-- Sistema de Notificaciones Unificado -->
+            <div class="notification-wrapper">
+                <button class="notification-trigger" id="notificationTrigger"
+                    onclick="NotificationSystem.toggleDropdown()">
+                    <i class="fas fa-bell"></i>
+                    <span class="notification-badge" id="notificationBadge">0</span>
+                </button>
+                <div class="notification-dropdown" id="notificationDropdown">
+                    <div class="notification-header">
+                        <h3>Notificaciones</h3>
+                    </div>
+                    <div class="notification-list" id="notificationList">
+                        <div class="notification-empty">Cargando...</div>
+                    </div>
+                </div>
+            </div>
+
+            <div style="text-align: right;">
+                <h2 id="mechanicName">Panel de Mecánico</h2>
+                <p>Gestión de Servicios</p>
+            </div>
+
+            <!-- Ajustes Dropdown -->
+            <div class="settings-container" id="settingsMenu">
+                <button class="settings-btn" onclick="toggleSettingsMenu(event)">
+                    <i class="fas fa-cog"></i>
+                </button>
+                <div class="settings-dropdown" id="settingsDropdown">
+                    <a href="pages/mecanico/perfil_mecanico.html"><i class="fas fa-user"></i> Perfil</a>
+                    <a href="#" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</a>
+                </div>
+            </div>
         </div>
-        <a href="#" id="logoutBtn" class="logout-btn">Cerrar Sesión</a>
     </header>
 
     <main class="portal-container">
@@ -727,6 +976,16 @@
                             </button>
                         `;
                     }
+                    // CASO 2.5: Cita finalizada esperando cliente
+                    else if (cita.estado === 'Esperando Confirmacion Cliente') {
+                        actionArea = `
+                            <div style="background-color: #e67e22; padding: 15px; border-radius: 6px; text-align: center; margin-bottom: 10px; animation: pulse 2s infinite;">
+                                <i class="fas fa-clock" style="font-size: 1.5em; display: block; margin-bottom: 5px;"></i>
+                                <strong style="color: #fff;">Esperando Confirmación del Cliente</strong>
+                                <p style="margin: 5px 0 0 0; font-size: 0.8em;">El cliente debe confirmar la entrega del vehículo.</p>
+                            </div>
+                        `;
+                    }
                     // CASO 3: Cita Asignada a Mí - COTIZADO (ESPERANDO APROBACIÓN)
                     else if (cita.estado === 'Cotizado') {
                         actionArea = `
@@ -809,11 +1068,12 @@
                         <div class="job-details">
                             <p><i class="fas fa-hashtag"></i> Placa: <strong>${cita.placa}</strong></p>
                             <p><i class="fas fa-user"></i> Cliente: ${cita.clienteNombre}</p>
+                            <p><i class="fas fa-tools"></i> <strong>Servicio:</strong> ${cita.servicioNombre || cita.servicio_solicitado || 'General'}</p>
                             <p><i class="fas fa-clock"></i> Cita: ${fecha}</p>
                         </div>
                         ${actionArea}
-                        <button class="chat-trigger-btn" onclick="abrirChatCita('${cita.idCita}', '${cita.clienteNombre}')">
-                            <i class="fas fa-comments"></i> Chat con Cliente
+                        <button class="chat-trigger-btn" onclick="abrirChatCita('${cita.idCita}', '${cita.clienteNombre}', '${cita.estado}')">
+                            <i class="fas fa-comments"></i> ${cita.estado === 'Completado' ? 'Visualizar Chat' : 'Chat con Cliente'}
                             <span class="chat-unread-badge" id="badge-${cita.idCita}" style="display:none"></span>
                         </button>
                     `;
@@ -839,14 +1099,16 @@
             if (event.target == modal) modal.style.display = "none";
         };
 
-        window.toggleForm = (id) => {
-            const form = document.getElementById(`form-${id}`);
-            // Toggle
+        window.toggleForm = (idCita) => {
+            const form = document.getElementById(`form-${idCita}`);
             if (form.style.display === 'block') {
                 form.style.display = 'none';
             } else {
-                // Hide others? No, allow multiple open
                 form.style.display = 'block';
+                // Auto-agregar el servicio solicitado si no está ya en la lista
+                // Buscamos la cita en el DOM para obtener el servicio original (o podemos buscar en el array original si lo guardamos globalmente)
+                // Para simplificar, si el mecánico apenas abre el formulario y no hay nada, intentamos agregar el "default".
+                // Pero necesitamos saber cuál es el default. Vamos a pasarle el ID del servicio a toggleForm.
             }
         }
 
@@ -895,6 +1157,18 @@
             }
         };
 
+        window.updatePrice = (idCita, index, newPrice) => {
+            if (selectedServices[idCita]) {
+                selectedServices[idCita][index].precio = parseFloat(newPrice) || 0;
+                // Recalcular total sin re-renderizar todo para no perder el foco si es posible?
+                // Mejor re-renderizar porque es más seguro, pero el foco se pierde.
+                // Usemos una actualización parcial del total.
+                let total = 0;
+                selectedServices[idCita].forEach(s => total += s.precio);
+                document.getElementById(`total-${idCita}`).textContent = total.toFixed(2);
+            }
+        };
+
         function renderServicesList(idCita) {
             const listContainer = document.getElementById(`services-list-${idCita}`);
             const totalSpan = document.getElementById(`total-${idCita}`);
@@ -912,12 +1186,18 @@
             services.forEach((s, index) => {
                 total += s.precio;
                 html += `
-                    <div style="display: flex; justify-content: space-between; align-items: center; background-color: #2c2c2c; padding: 8px; margin-bottom: 5px; border-radius: 4px; border: 1px solid #444;">
-                        <div>
-                            <span style="color: #f39c12; font-weight: bold;">${s.nombre}</span>
-                            <span style="color: #aaa; font-size: 0.9em;"> - $${s.precio}</span>
+                    <div style="display: flex; justify-content: space-between; align-items: center; background-color: #2c2c2c; padding: 10px; margin-bottom: 8px; border-radius: 6px; border: 1px solid #444; gap: 10px;">
+                        <div style="flex: 1;">
+                            <span style="color: #f39c12; font-weight: bold; display: block;">${s.nombre}</span>
+                            <span style="color: #888; font-size: 0.8em;">Original: $${s.precioOriginal || s.precio}</span>
                         </div>
-                        <button onclick="removeService('${idCita}', ${index})" style="background: none; border: none; color: #e74c3c; cursor: pointer;">
+                        <div style="width: 100px;">
+                            <input type="number" step="0.01" class="dark-input" value="${s.precio}" 
+                                   onchange="updatePrice('${idCita}', ${index}, this.value)" 
+                                   style="padding: 5px; font-size: 0.9em; text-align: right; width: 100%;"
+                                   placeholder="Precio">
+                        </div>
+                        <button onclick="removeService('${idCita}', ${index})" style="background: none; border: none; color: #e74c3c; cursor: pointer; padding: 5px;">
                             <i class="fas fa-trash"></i>
                         </button>
                     </div>
@@ -937,8 +1217,11 @@
 
             const notas = document.getElementById(`notes-${idCita}`).value;
 
-            // Extract just the IDs to send
-            const serviciosIds = services.map(s => s.id);
+            // Extract IDs and customized prices
+            const serviciosData = services.map(s => ({
+                idServicio: s.id,
+                precio: s.precio
+            }));
 
             try {
                 const res = await fetch('/api/mecanico/cotizar', {
@@ -946,7 +1229,7 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         idCita,
-                        servicios: serviciosIds,
+                        servicios: serviciosData,
                         notas: notas
                     })
                 });
@@ -1062,11 +1345,30 @@
         }
 
         // Abrir el chat de una cita específica
-        window.abrirChatCita = function (idCita, clienteNombre) {
+        window.abrirChatCita = function (idCita, clienteNombre, estadoCita = 'En Proceso') {
             chatActivoIdCita = idCita;
             document.getElementById('chatNombreCliente').textContent = clienteNombre;
             document.getElementById('chatSubtitulo').textContent = `Cita: ${idCita}`;
             document.getElementById('chatModalOverlay').classList.add('active');
+
+            // --- Lógica de Solo Lectura ---
+            const isReadonly = estadoCita === 'Completado';
+            const textarea = document.getElementById('chatTextarea');
+            const sendBtn = document.getElementById('chatSendBtn');
+            const attachBtn = document.getElementById('chatAttachBtn');
+
+            if (isReadonly) {
+                textarea.disabled = true;
+                textarea.placeholder = "Chat finalizado (Solo lectura)";
+                sendBtn.style.display = 'none';
+                attachBtn.style.display = 'none';
+            } else {
+                textarea.disabled = false;
+                textarea.placeholder = "Escribe un mensaje...";
+                sendBtn.style.display = 'flex';
+                attachBtn.style.display = 'block';
+            }
+
             cargarMensajes(false);
             if (chatPolling) clearInterval(chatPolling);
             chatPolling = setInterval(() => cargarMensajes(true), 5000);
@@ -1126,6 +1428,41 @@
             document.getElementById('chatLightbox').addEventListener('click', () => {
                 document.getElementById('chatLightbox').classList.remove('show');
             });
+
+            // --- Toggle Menú Ajustes ---
+            const settingsTrigger = document.querySelector('.settings-btn');
+            const settingsContainer = document.querySelector('.settings-container');
+
+            if (settingsTrigger && settingsContainer) {
+                settingsTrigger.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    settingsContainer.classList.toggle('active');
+                });
+            }
+
+            // Cerrar al hacer clic fuera
+            document.addEventListener('click', (e) => {
+                if (settingsContainer && settingsContainer.classList.contains('active') && !settingsContainer.contains(e.target)) {
+                    settingsContainer.classList.remove('active');
+                }
+            });
+
+            // --- Cargar Foto de Perfil si existe ---
+            async function cargarFotoPerfil() {
+                try {
+                    const res = await fetch('/api/mecanico/perfil');
+                    if (res.ok) {
+                        const data = await res.json();
+                        if (data.foto_perfil) {
+                            const avatar = document.getElementById('userAvatar');
+                            if (avatar) avatar.src = data.foto_perfil;
+                        }
+                    }
+                } catch (e) {
+                    console.error("Error al cargar foto de perfil", e);
+                }
+            }
+            cargarFotoPerfil();
         });
 
         function limpiarImagen() {
@@ -1299,6 +1636,25 @@
         <img id="chatLightboxImg" src="" alt="Imagen ampliada">
     </div>
 
+    <script>
+        // --- FUNCIONES DEL MENÚ DE AJUSTES ---
+        function toggleSettingsMenu(event) {
+            event.stopPropagation();
+            const container = document.getElementById('settingsMenu');
+            container.classList.toggle('active');
+        }
+
+        // Cerrar el menú si se hace click fuera de él
+        document.addEventListener('click', function (event) {
+            const container = document.getElementById('settingsMenu');
+            const dropdown = document.getElementById('settingsDropdown');
+            if (container && container.classList.contains('active') && !container.contains(event.target)) {
+                container.classList.remove('active');
+            }
+        });
+    </script>
+
+    <script src="js/notifications.js"></script>
     <script src="http://localhost:3000/js/global_nav.js"></script>
 </body>
 

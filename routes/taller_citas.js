@@ -143,10 +143,10 @@ router.get('/citas/:id', isAuthenticated, async (req, res) => {
     }
 });
 
-// @route   GET /api/taller/mecanicos
+// @route   GET /api/taller/mecanicos-activos
 // @desc    Obtener mecánicos del taller
 // @access  Private (Admin)
-router.get('/mecanicos', isAuthenticated, async (req, res) => {
+router.get('/mecanicos-activos', isAuthenticated, async (req, res) => {
     try {
         // Obtener idTaller del administrador
         const [admin] = await db.query(
@@ -165,7 +165,7 @@ router.get('/mecanicos', isAuthenticated, async (req, res) => {
             SELECT m.idUsuario, u.nombre, m.especialidad
             FROM mecanico m
             JOIN usuario u ON m.idUsuario = u.idUsuario
-            WHERE m.idTaller = ?
+            WHERE m.idTaller = ? AND m.estado_solicitud = 'APROBADO'
             ORDER BY u.nombre ASC
         `, [idTaller]);
 
@@ -264,15 +264,25 @@ router.put('/citas/:id/completar', isAuthenticated, async (req, res) => {
             return res.status(400).json({ error: 'No se puede completar una cita cancelada' });
         }
 
-        // Actualizar estado a Completado
+        // Actualizar estado a Esperando Confirmacion Cliente
         await db.query(
             'UPDATE cita SET estado = ? WHERE idCita = ?',
-            ['Completado', id]
+            ['Esperando Confirmacion Cliente', id]
         );
+
+        // Notificar al cliente
+        const [citaRow] = await db.query('SELECT idCliente FROM cita WHERE idCita = ?', [id]);
+        if (citaRow.length > 0) {
+            const idCliente = citaRow[0].idCliente;
+            await db.query(
+                'INSERT INTO notificacion (idUsuario, titulo, mensaje, tipo) VALUES (?, ?, ?, ?)',
+                [idCliente, 'Auto listo para entrega', 'El taller ha marcado como finalizado el trabajo para la cita ' + id + '. Por favor, confirma la entrega en tu portal.', 'cita']
+            );
+        }
 
         res.json({
             success: true,
-            mensaje: 'Cita marcada como completada exitosamente'
+            mensaje: 'Cita marcada como esperando confirmación exitosamente'
         });
 
     } catch (error) {

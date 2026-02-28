@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Punto de Venta - Portal de Taller</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="../../style.css">
+    <style>
+        body {
+            background-color: #202020;
+            color: #fff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .portal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 40px;
+            background-color: #1a1a1a;
+            border-bottom: 1px solid #333;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .logo {
+            width: 120px;
+        }
+
+        .back-link {
+            color: #ccc;
+            text-decoration: none;
+            font-size: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .back-link:hover {
+            color: #f39c12;
+        }
+
+        .page-container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #444;
+            padding-bottom: 15px;
+            margin-bottom: 30px;
+        }
+
+        .page-title {
+            font-size: 2.2em;
+            margin: 0;
+            color: #2ecc71;
+        }
+
+        .pos-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        .pos-panel {
+            background-color: #2c2c2c;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        .pos-panel h2 {
+            margin-top: 0;
+            color: #f39c12;
+            border-bottom: 1px solid #444;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            color: #ccc;
+            margin-bottom: 8px;
+        }
+
+        .dark-input {
+            width: 100%;
+            padding: 12px;
+            background-color: #1a1a1a;
+            border: 1px solid #444;
+            color: white;
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 1.1em;
+        }
+
+        .btn-pos {
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            width: 100%;
+            font-size: 1.2em;
+            transition: background 0.3s;
+            margin-top: 10px;
+        }
+
+        .btn-pos:hover {
+            background-color: #27ae60;
+        }
+
+        .btn-pos:disabled {
+            background-color: #7f8c8d;
+            cursor: not-allowed;
+        }
+
+        .ticket-preview {
+            margin-top: 30px;
+            background-color: #fff;
+            color: #000;
+            padding: 20px;
+            padding-bottom: 40px;
+            border-radius: 0;
+            font-family: 'Courier New', Courier, monospace;
+            text-align: center;
+            border: 1px dashed #ccc;
+            display: none;
+            margin-left: auto;
+            margin-right: auto;
+            max-width: 300px;
+        }
+
+        .ticket-header {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-bottom: 10px;
+            border-bottom: 1px dashed #000;
+            padding-bottom: 10px;
+        }
+
+        .ticket-code {
+            font-size: 2em;
+            font-weight: bold;
+            margin: 15px 0;
+            border: 2px solid #000;
+            padding: 10px;
+            display: inline-block;
+            letter-spacing: 2px;
+        }
+
+        @media (max-width: 768px) {
+            .pos-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header class="portal-header">
+        <div class="header-left">
+            <a href="../../portal_taller.html"><img src="../../imagenes/Logo_Autoguest.png" alt="AutoGuest"
+                    class="logo"></a>
+            <a href="../../portal_taller.html" class="back-link"><i class="fas fa-arrow-left"></i> Volver al Panel</a>
+        </div>
+        <div class="header-info" style="text-align:right;">
+            <h2 id="workshopName" style="margin:0; font-size:1.2em;">Taller</h2>
+            <p style="margin:0; font-size:0.9em; color:#a0a0a0;">Punto de Venta</p>
+        </div>
+    </header>
+
+    <main class="page-container">
+        <div class="page-header">
+            <h1 class="page-title"><i class="fas fa-cash-register"></i> Punto de Venta</h1>
+        </div>
+
+        <div class="pos-grid">
+            <!-- VENTA DE PRODUCTOS FÍSICOS -->
+            <div class="pos-panel">
+                <h2><i class="fas fa-box"></i> Venta de Productos (Inventario)</h2>
+                <p style="color:#aaa; margin-bottom:20px;">Realiza una venta física en mostrador. Se descontará del
+                    stock automáticamente.</p>
+                <form id="ventaForm">
+                    <div class="form-group">
+                        <label>Seleccionar Producto:</label>
+                        <select id="productoSelect" class="dark-input" required>
+                            <option value="">Cargando productos...</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Cantidad a Vender:</label>
+                        <input type="number" id="cantidadVenta" class="dark-input" min="1" value="1" required>
+                    </div>
+                    <div class="form-group"
+                        style="text-align: right; font-size: 1.5em; font-weight: bold; color: #f39c12;">
+                        Total: $<span id="totalVenta">0.00</span>
+                    </div>
+                    <button type="submit" class="btn-pos"><i class="fas fa-shopping-cart"></i> Cobrar y Generar
+                        Ticket</button>
+                </form>
+
+                <div id="ticketVenta" class="ticket-preview">
+                    <div class="ticket-header" id="ticketVentaTaller">Mi Taller</div>
+                    <div style="margin-bottom:15px; font-size:0.9em;">** TICKET DE COMPRA **</div>
+                    <div style="text-align:left; margin-bottom:5px;" id="ticketVentaProducto">1x Aceite Sintético</div>
+                    <div style="text-align:right; font-weight:bold; font-size:1.2em; border-top:1px solid #000; padding-top:10px; margin-top:10px;"
+                        id="ticketVentaTotal">Total: $150.00</div>
+                    <div style="margin-top:20px; font-size:0.8em;">¡Gracias por su compra!</div>
+                    <div style="margin-top:20px;">
+                        <button onclick="window.print()"
+                            style="background:#000; color:#fff; padding:5px 10px; border:none; cursor:pointer;"><i
+                                class="fas fa-print"></i> Imprimir</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- COBRO EN EFECTIVO DE CITAS -->
+            <div class="pos-panel" style="border: 2px solid #f39c12;">
+                <h2 style="color:#f39c12;"><i class="fas fa-wrench"></i> Cobro de Citas en Efectivo</h2>
+                <p style="color:#aaa; margin-bottom:20px;">Genera un código de confirmación de pago para dárselo al
+                    cliente. El cliente lo ingresará en su portal para confirmar la entrega y liberar su auto.</p>
+                <form id="citaForm">
+                    <div class="form-group">
+                        <label>Seleccionar Cita (Esperando Confirmación):</label>
+                        <select id="citaSelect" class="dark-input" required>
+                            <option value="">Cargando citas...</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn-pos" style="background-color: #f39c12;"><i
+                            class="fas fa-money-bill-wave"></i> Registrar Pago y Generar Código</button>
+                </form>
+
+                <div id="ticketCita" class="ticket-preview">
+                    <div class="ticket-header" id="ticketCitaTaller">Mi Taller</div>
+                    <div style="margin-bottom:15px; font-size:0.9em;">** COMPROBANTE DE PAGO **</div>
+                    <div style="text-align:left; margin-bottom:5px;" id="ticketCitaInfo">Cita #123456</div>
+                    <div style="margin-top:15px; font-size:0.9em;">CÓDIGO DE LIBERACIÓN:</div>
+                    <div class="ticket-code" id="ticketCitaCodigo">ABCDEF</div>
+                    <div style="margin-top:5px; font-size:0.8em;">Ingrese este código en su portal cliente para
+                        confirmar la entrega.</div>
+                    <div style="margin-top:20px;">
+                        <button onclick="window.print()"
+                            style="background:#000; color:#fff; padding:5px 10px; border:none; cursor:pointer;"><i
+                                class="fas fa-print"></i> Imprimir</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let inventario = [];
+        let citas = [];
+        let tallerNameStr = "Mi Taller";
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const isLoggedIn = sessionStorage.getItem('isLoggedIn');
+            const userRole = sessionStorage.getItem('userRole');
+            if (!isLoggedIn || userRole !== 'taller') {
+                alert('Acceso denegado');
+                window.location.href = '../../login_taller.html';
+                return;
+            }
+
+            const tallerName = sessionStorage.getItem('tallerName');
+            if (tallerName) {
+                document.getElementById('workshopName').textContent = tallerName;
+                document.getElementById('ticketVentaTaller').textContent = tallerName;
+                document.getElementById('ticketCitaTaller').textContent = tallerName;
+                tallerNameStr = tallerName;
+            }
+
+            cargarInventario();
+            cargarCitas();
+
+            // Actualizar total dinámicamente
+            document.getElementById('cantidadVenta').addEventListener('input', updateTotal);
+            document.getElementById('productoSelect').addEventListener('change', updateTotal);
+        });
+
+        async function cargarInventario() {
+            try {
+                const res = await fetch('/api/inventario/taller');
+                if (res.ok) {
+                    inventario = await res.json();
+                    const select = document.getElementById('productoSelect');
+                    if (inventario.length === 0) {
+                        select.innerHTML = '<option value="">No hay productos en inventario</option>';
+                    } else {
+                        select.innerHTML = '<option value="">-- Selecciona un producto --</option>' +
+                            inventario.filter(i => i.stock > 0).map(i => `<option value="${i.idItem}">[Stock: ${i.stock}] ${i.nombre} - $${i.precio.toFixed(2)}</option>`).join('');
+                    }
+                }
+            } catch (e) { console.error('Error cargando inventario', e); }
+        }
+
+        async function cargarCitas() {
+            try {
+                const res = await fetch('/api/taller/citas');
+                if (res.ok) {
+                    const allCitas = await res.json();
+                    // Filtrar solo las que esperan confirmación
+                    citas = allCitas.filter(c => c.estado === 'Esperando Confirmacion Cliente');
+                    const select = document.getElementById('citaSelect');
+                    if (citas.length === 0) {
+                        select.innerHTML = '<option value="">No hay citas listas esperando pago</option>';
+                        document.querySelector('#citaForm .btn-pos').disabled = true;
+                    } else {
+                        select.innerHTML = '<option value="">-- Selecciona una cita --</option>' +
+                            citas.map(c => `<option value="${c.idCita}">${new Date(c.fechaHora).toLocaleDateString()} - ${c.clienteNombre} (${c.placa})</option>`).join('');
+                        document.querySelector('#citaForm .btn-pos').disabled = false;
+                    }
+                }
+            } catch (e) { console.error('Error cargando citas', e); }
+        }
+
+        function updateTotal() {
+            const id = document.getElementById('productoSelect').value;
+            const cant = parseInt(document.getElementById('cantidadVenta').value) || 0;
+            const item = inventario.find(i => i.idItem === id);
+            if (item) {
+                document.getElementById('totalVenta').textContent = (item.precio * cant).toFixed(2);
+            } else {
+                document.getElementById('totalVenta').textContent = "0.00";
+            }
+        }
+
+        // POST Venta
+        document.getElementById('ventaForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const idItem = document.getElementById('productoSelect').value;
+            const cantidad = parseInt(document.getElementById('cantidadVenta').value);
+            if (!idItem || cantidad <= 0) return alert('Selecciona producto y cantidad válida');
+
+            const btn = e.target.querySelector('button');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Procesando...';
+
+            try {
+                const res = await fetch('/api/taller/pos/venta', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ idItem, cantidad })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    alert('Venta procesada con éxito');
+
+                    // Mostrar ticket
+                    const item = inventario.find(i => i.idItem === idItem);
+                    document.getElementById('ticketVentaProducto').textContent = `${cantidad}x ${item.nombre}`;
+                    document.getElementById('ticketVentaTotal').textContent = `Total: $${(item.precio * cantidad).toFixed(2)}`;
+                    document.getElementById('ticketVenta').style.display = 'block';
+
+                    document.getElementById('ventaForm').reset();
+                    document.getElementById('totalVenta').textContent = "0.00";
+                    cargarInventario(); // Refrescar stock
+                } else {
+                    alert(data.error || 'Error al procesar venta');
+                }
+            } catch (e) { alert('Error de conexión'); }
+            finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-shopping-cart"></i> Cobrar y Generar Ticket';
+            }
+        });
+
+        // POST Cita Code
+        document.getElementById('citaForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const idCita = document.getElementById('citaSelect').value;
+            if (!idCita) return alert('Selecciona una cita');
+
+            const btn = e.target.querySelector('button');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generando Código...';
+
+            try {
+                const res = await fetch(`/api/taller/pos/cita/${idCita}/cobrar`, { method: 'POST' });
+                const data = await res.json();
+                if (res.ok) {
+                    alert('Pago en efectivo registrado. Entregue el código al cliente.');
+                    const cita = citas.find(c => c.idCita === idCita);
+                    document.getElementById('ticketCitaInfo').innerHTML = `<strong>Cita:</strong> ${cita.idCita}<br><strong>Cliente:</strong> ${cita.clienteNombre}<br><strong>Vehículo:</strong> ${cita.marca} (${cita.placa})`;
+                    document.getElementById('ticketCitaCodigo').textContent = data.codigo;
+                    document.getElementById('ticketCita').style.display = 'block';
+
+                    cargarCitas(); // Refrescar citas
+                } else {
+                    alert(data.error || 'Error al generar código');
+                }
+            } catch (e) { alert('Error de conexión'); }
+            finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-money-bill-wave"></i> Registrar Pago y Generar Código';
+            }
+        });
+
+    </script>
+</body>
+
+</html>

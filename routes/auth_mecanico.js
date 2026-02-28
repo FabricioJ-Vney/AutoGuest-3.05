@@ -51,8 +51,8 @@ router.post('/registro', async (req, res) => {
         if (admins.length > 0) {
             const idAdminTaller = admins[0].idUsuario;
             await db.query(
-                'INSERT INTO notificacion (idUsuario, titulo, mensaje) VALUES (?, ?, ?)',
-                [idAdminTaller, 'Nueva Solicitud de Mecánico', 'El mecánico ' + nombre + ' ha solicitado unirse a tu taller. Ve a Gestionar Mecánicos para aprobar o rechazar su solicitud.']
+                'INSERT INTO notificacion (idUsuario, titulo, mensaje, tipo) VALUES (?, ?, ?, ?)',
+                [idAdminTaller, 'Nueva Solicitud de Mecánico', 'El mecánico ' + nombre + ' ha solicitado unirse a tu taller. Ve a Gestionar Mecánicos para aprobar o rechazar su solicitud.', 'mecanico']
             );
         }
 
@@ -112,12 +112,14 @@ router.get('/mis-citas', async (req, res) => {
 
     try {
         const [citas] = await db.query(`
-            SELECT c.idCita, c.fechaHora, c.estado, c.idMecanico,
+            SELECT c.idCita, c.fechaHora, c.estado, c.idMecanico, c.servicio_solicitado,
                    v.marca, v.modelo, v.placa, 
-                   u.nombre as clienteNombre
+                   u.nombre as clienteNombre,
+                   ii.nombre as servicioNombre
             FROM cita c
             JOIN vehiculo v ON c.idVehiculo = v.idVehiculo
             JOIN usuario u ON c.idCliente = u.idUsuario
+            LEFT JOIN iteminventario ii ON c.servicio_solicitado = ii.idItemInventario
             WHERE (c.idMecanico = ? AND c.estado != 'Cancelado') 
                OR (c.idTaller = ? AND c.idMecanico IS NULL AND c.estado = 'Pendiente')
             ORDER BY c.fechaHora ASC
@@ -158,8 +160,19 @@ router.post('/finalizar-cita/:id', async (req, res) => {
     const { id } = req.params;
 
     try {
-        await db.query('UPDATE cita SET estado = ? WHERE idCita = ?', ['Completado', id]);
-        res.json({ success: true, message: 'Trabajo finalizado correctamente.' });
+        await db.query('UPDATE cita SET estado = ? WHERE idCita = ?', ['Esperando Confirmacion Cliente', id]);
+
+        // Notificar al cliente
+        const [citaRow] = await db.query('SELECT idCliente FROM cita WHERE idCita = ?', [id]);
+        if (citaRow.length > 0) {
+            const idCliente = citaRow[0].idCliente;
+            await db.query(
+                'INSERT INTO notificacion (idUsuario, titulo, mensaje) VALUES (?, ?, ?)',
+                [idCliente, 'Auto listo para entrega', 'El mecánico ha finalizado el trabajo del vehículo asociado a la cita ' + id + '. Por favor, confirma la entrega en tu portal.']
+            );
+        }
+
+        res.json({ success: true, message: 'Trabajo finalizado, esperando confirmación del cliente.' });
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'Error al finalizar trabajo.' });
@@ -171,7 +184,7 @@ router.post('/finalizar-cita/:id', async (req, res) => {
 router.post('/cotizar', async (req, res) => {
     if (!req.session.userId || req.session.role !== 'mecanico') return res.status(401).json({ error: 'No autorizado' });
 
-    const { idCita, servicios, notas } = req.body; // servicios is array of IDs
+    const { idCita, servicios, notas } = req.body; // servicios is array of { idServicio, precio }
 
     if (!servicios || !Array.isArray(servicios) || servicios.length === 0) {
         return res.status(400).json({ error: 'Debe seleccionar al menos un servicio.' });
@@ -184,8 +197,7 @@ router.post('/cotizar', async (req, res) => {
         connection = await db.getConnection();
         await connection.beginTransaction();
 
-        // 0. Ensure junction table exists (Safe to run multiple times, but ideally in migration)
-        // Ignoring user rule "don't affect other processes" risk slightly to ensure this works without manual DB intervention
+        // 0. Ensure junction table exists
         await connection.query(`
             CREATE TABLE IF NOT EXISTS cotizacion_servicios (
                 idCotizacion VARCHAR(50),
@@ -197,37 +209,23 @@ router.post('/cotizar', async (req, res) => {
             )
         `);
 
-        // 1. Calculate Total and Validate Services
+        // 1. Calculate Total using provided prices
         let total = 0;
-        const validServices = [];
-
-        for (const serviceId of servicios) {
-            const [rows] = await connection.query('SELECT * FROM servicio WHERE idServicio = ?', [serviceId]);
-            if (rows.length > 0) {
-                const service = rows[0];
-                total += parseFloat(service.precio);
-                validServices.push(service);
-            }
-        }
-
-        if (validServices.length === 0) {
-            throw new Error("Ningún servicio válido encontrado.");
+        for (const s of servicios) {
+            total += parseFloat(s.precio || 0);
         }
 
         // 2. Crear cotización header
-        // Using 'notas' as 'diagnostico' for backward compatibility or simple text field
-        // 'mano_obra' and 'costo_refacciones' set to 0 as they are now bundled in services, or we could split if service has structure.
-        // For now, total is what matters.
         await connection.query(
             'INSERT INTO cotizacion (idCotizacion, idCita, diagnostico, mano_obra, costo_refacciones, totalAprobado, estado_pago) VALUES (?, ?, ?, ?, ?, ?, ?)',
             [idCotizacion, idCita, notas || 'Servicios predefinidos', 0, 0, total, 'PENDIENTE']
         );
 
-        // 3. Insert services into junction table
-        for (const service of validServices) {
+        // 3. Insert services into junction table with provided prices
+        for (const s of servicios) {
             await connection.query(
                 'INSERT INTO cotizacion_servicios (idCotizacion, idServicio, precio) VALUES (?, ?, ?)',
-                [idCotizacion, service.idServicio, service.precio]
+                [idCotizacion, s.idServicio, s.precio]
             );
         }
 
@@ -239,8 +237,8 @@ router.post('/cotizar', async (req, res) => {
         if (citaRow.length > 0) {
             const idCliente = citaRow[0].idCliente;
             await connection.query(
-                'INSERT INTO notificacion (idUsuario, titulo, mensaje) VALUES (?, ?, ?)',
-                [idCliente, '¡Nueva Cotización Recibida!', 'El mecánico ha enviado una cotización para tu cita ' + idCita + '. Revísala para continuar.']
+                'INSERT INTO notificacion (idUsuario, titulo, mensaje, tipo) VALUES (?, ?, ?, ?)',
+                [idCliente, '¡Nueva Cotización Recibida!', 'El mecánico ha enviado una cotización para tu cita ' + idCita + '. Revísala para continuar.', 'cita']
             );
         }
 
@@ -327,6 +325,85 @@ router.post('/crear-orden-express', async (req, res) => {
         res.status(500).json({ error: 'Error al crear la orden.' });
     } finally {
         if (connection) connection.release();
+    }
+});
+
+// --- OBTENER PERFIL DEL MECÁNICO ---
+router.get('/perfil', async (req, res) => {
+    if (!req.session.userId || req.session.role !== 'mecanico') {
+        return res.status(401).json({ mensaje: 'No autorizado' });
+    }
+
+    try {
+        const [rows] = await db.query(`
+            SELECT u.nombre, u.email, u.telefono, u.foto_perfil, m.especialidad, m.idTaller, t.nombre as tallerNombre
+            FROM usuario u
+            JOIN mecanico m ON u.idUsuario = m.idUsuario
+            JOIN taller t ON m.idTaller = t.idTaller
+            WHERE u.idUsuario = ?
+        `, [req.session.userId]);
+
+        if (rows.length === 0) {
+            return res.status(404).json({ mensaje: 'Perfil no encontrado.' });
+        }
+
+        res.json(rows[0]);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ mensaje: 'Error al obtener el perfil.' });
+    }
+});
+
+// --- CAMBIAR DE TALLER ---
+router.put('/cambiar-taller', async (req, res) => {
+    if (!req.session.userId || req.session.role !== 'mecanico') {
+        return res.status(401).json({ mensaje: 'No autorizado' });
+    }
+
+    const { idTaller } = req.body;
+    const { userId } = req.session;
+
+    if (!idTaller) {
+        return res.status(400).json({ mensaje: 'ID de taller es obligatorio.' });
+    }
+
+    try {
+        // 1. Validar que el taller exista
+        const [taller] = await db.query('SELECT nombre FROM taller WHERE idTaller = ?', [idTaller]);
+        if (taller.length === 0) {
+            return res.status(404).json({ mensaje: 'El taller con ese ID no existe.' });
+        }
+
+        const nuevoTallerNombre = taller[0].nombre;
+
+        // 2. Obtener nombre del mecánico para la notificación
+        const [mecanico] = await db.query('SELECT nombre FROM usuario WHERE idUsuario = ?', [userId]);
+        const mecanicoNombre = mecanico[0].nombre;
+
+        // 3. Actualizar taller y poner en PENDIENTE
+        await db.query(
+            'UPDATE mecanico SET idTaller = ?, estado_solicitud = ? WHERE idUsuario = ?',
+            [idTaller, 'PENDIENTE', userId]
+        );
+
+        // 4. Notificar al administrador del taller
+        const [admins] = await db.query('SELECT idUsuario FROM administrador WHERE idTaller = ?', [idTaller]);
+        if (admins.length > 0) {
+            const idAdminTaller = admins[0].idUsuario;
+            await db.query(
+                'INSERT INTO notificacion (idUsuario, titulo, mensaje, tipo) VALUES (?, ?, ?, ?)',
+                [idAdminTaller, 'Nueva Solicitud de Mecánico (Cambio)', `El mecánico ${mecanicoNombre} solicita unirse a tu taller ${nuevoTallerNombre}.`, 'mecanico']
+            );
+        }
+
+        // 5. Destruir sesión (opcional, pero recomendado ya que ahora está pendiente)
+        req.session.destroy();
+
+        res.json({ success: true, mensaje: 'Solicitud de cambio enviada. Debes esperar aprobación del nuevo taller.' });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ mensaje: 'Error al procesar el cambio de taller.' });
     }
 });
 

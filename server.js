@@ -34,8 +34,8 @@ app.use(cors({
     credentials: true, // Permitir el envío de cookies de sesión cross-origin
     allowedHeaders: ['Content-Type', 'Authorization', 'Accept']
 }));
-app.use(express.json()); // Para poder entender JSON en el cuerpo de las peticiones
-
+app.use(express.json({ limit: '50mb' })); // Aumentar límite para imágenes
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 // Configuración de express-session
 app.use(session({
     secret: process.env.SESSION_SECRET,

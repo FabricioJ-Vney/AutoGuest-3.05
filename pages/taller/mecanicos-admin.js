@@ -121,15 +121,15 @@ function mostrarMecanicos(mecanicos) {
 async function aprobarMecanico(idMecanico) {
     if (!confirm('¿Estás seguro de aprobar a este mecánico? Podrá acceder a las herramientas del taller.')) return;
     try {
-        const res = await fetch(\`/api/taller/mecanicos/\${idMecanico}/aprobar\`, { method: 'PUT' });
+        const res = await fetch(`/api/taller/mecanicos/${idMecanico}/aprobar`, { method: 'PUT' });
         const data = await res.json();
-        if(res.ok) {
+        if (res.ok) {
             alert(data.message);
             cargarMecanicos(); // Recargar datos
         } else {
             alert(data.error);
         }
-    } catch(e) {
+    } catch (e) {
         console.error(e);
         alert('Error conectando al servidor.');
     }
@@ -137,22 +137,22 @@ async function aprobarMecanico(idMecanico) {
 
 // Remover o rechazar mecánico
 async function removerMecanico(idMecanico) {
-    let msg = currentTab === 'activos' 
+    let msg = currentTab === 'activos'
         ? '¿Seguro que deseas dar de baja a este mecánico? Sus citas en proceso pasarán a estado "Pendiente".'
         : '¿Seguro que deseas rechazar y eliminar esta solicitud?';
-    
-    if(!confirm(msg)) return;
-    
+
+    if (!confirm(msg)) return;
+
     try {
-        const res = await fetch(\`/api/taller/mecanicos/\${idMecanico}/remover\`, { method: 'PUT' });
+        const res = await fetch(`/api/taller/mecanicos/${idMecanico}/remover`, { method: 'PUT' });
         const data = await res.json();
-        if(res.ok) {
+        if (res.ok) {
             alert(data.message);
             cargarMecanicos(); // Recargar datos
         } else {
             alert(data.error);
         }
-    } catch(e) {
+    } catch (e) {
         console.error(e);
         alert('Error conectando al servidor.');
     }
@@ -167,14 +167,14 @@ function actualizarEstadisticas() {
     if (totalElement) totalElement.textContent = aprobados.length;
 
     const pendientesElement = document.getElementById('pendientes-count');
-    if(pendientesElement) pendientesElement.textContent = pendientes.length;
+    if (pendientesElement) pendientesElement.textContent = pendientes.length;
 }
 
 // Mostrar error
 function mostrarError() {
     const container = document.getElementById('mecanicos-container');
     if (container) {
-        container.innerHTML = \`
+        container.innerHTML = `
             <div class="empty-state">
                 <i class="fas fa-exclamation-triangle"></i>
                 <p>Error al cargar los mecánicos</p>
@@ -182,6 +182,6 @@ function mostrarError() {
                     <i class="fas fa-redo"></i> Reintentar
                 </button>
             </div>
-        \`;
+        `;
     }
 }

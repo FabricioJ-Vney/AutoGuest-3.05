@@ -129,14 +129,14 @@
     <header class="dashboard-header"
         style="padding: 15px 25px; background-color: #1a1a1a; display: flex; justify-content: space-between; align-items: center;">
         <div class="header-left" style="display: flex; align-items: center; gap: 20px;">
-            <a href="historial_cliente.html"
+            <a href="historial_cliente.html" id="header-back-btn"
                 style="color: #f39c12; text-decoration: none; font-size: 20px; display: flex; align-items: center;">
                 <i class="fas fa-arrow-left"></i>
             </a>
             <a href="historial_cliente.html"><img src="../../imagenes/Logo_Autoguest.png" alt="Logo de AutoGuest"
                     width="110"></a>
         </div>
-        <div class="header-right">
+        <div class="header-right" id="header-home-btn">
             <a href="dashboard_cliente.html" style="color: #f39c12; font-size: 24px; text-decoration: none;">
                 <i class="fas fa-home"></i>
             </a>
@@ -184,7 +184,7 @@
             </div>
         </div>
 
-        <div class="buttons">
+        <div class="buttons" id="bottom-buttons">
             <button class="btn btn-success" onclick="downloadPDF()"><i class="fas fa-file-pdf"></i> Imprimir</button>
         </div>
     </div>
@@ -199,6 +199,33 @@
             if (!idTicket) {
                 alert("No se encontró ID de ticket válido");
                 return;
+            }
+
+            const isHistory = urlParams.get('source') === 'history';
+            const headerBackBtn = document.getElementById('header-back-btn');
+            const headerHomeBtn = document.getElementById('header-home-btn');
+            const bottomButtons = document.getElementById('bottom-buttons');
+
+            if (isHistory) {
+                // History mode
+                headerBackBtn.style.display = 'flex';
+                headerHomeBtn.style.display = 'block';
+                bottomButtons.innerHTML = `<button class="btn btn-success" onclick="downloadPDF()"><i class="fas fa-file-pdf"></i> Imprimir</button>`;
+            } else {
+                // Purchase mode
+                const idTallerTicket = urlParams.get('idTaller');
+                let catalogoUrl = "catalogo-om66/Catalogo_Productos.html";
+                if (idTallerTicket) {
+                    catalogoUrl += `?idTaller=${idTallerTicket}`;
+                }
+
+                headerBackBtn.style.display = 'none';
+                headerHomeBtn.style.display = 'none';
+                bottomButtons.innerHTML = `
+                    <a href="${catalogoUrl}" class="btn btn-primary"><i class="fas fa-shopping-cart"></i> Seguir Comprando</a>
+                    <button class="btn btn-success" onclick="downloadPDF()"><i class="fas fa-file-pdf"></i> Imprimir</button>
+                    <a href="dashboard_cliente.html" class="btn btn-secondary"><i class="fas fa-home"></i></a>
+                `;
             }
 
             document.getElementById('lblIdTicket').innerText = idTicket;

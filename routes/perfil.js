@@ -20,7 +20,7 @@ router.get('/', isAuthenticated, async (req, res) => {
 
     try {
         const [usuarios] = await db.query(
-            'SELECT u.idUsuario, u.nombre, u.email FROM usuario u WHERE u.idUsuario = ?',
+            'SELECT u.idUsuario, u.nombre, u.email, u.foto_perfil FROM usuario u WHERE u.idUsuario = ?',
             [idUsuario]
         );
 
@@ -40,11 +40,11 @@ router.get('/', isAuthenticated, async (req, res) => {
 // @access  Private
 router.put('/', isAuthenticated, async (req, res) => {
     const idUsuario = req.session.userId;
-    const { nombre, email, password } = req.body;
+    const { nombre, email, password, foto_perfil } = req.body;
 
     try {
         // Validar que al menos un campo esté presente
-        if (!nombre && !email && !password) {
+        if (!nombre && !email && !password && !foto_perfil) {
             return res.status(400).json({ error: 'Debe proporcionar al menos un campo para actualizar' });
         }
 
@@ -80,6 +80,11 @@ router.put('/', isAuthenticated, async (req, res) => {
             updateValues.push(hashedPassword);
         }
 
+        if (foto_perfil) {
+            updateFields.push('foto_perfil = ?');
+            updateValues.push(foto_perfil);
+        }
+
         // Agregar ID al final
         updateValues.push(idUsuario);
 
@@ -91,7 +96,7 @@ router.put('/', isAuthenticated, async (req, res) => {
 
         // Obtener datos actualizados
         const [usuarios] = await db.query(
-            'SELECT idUsuario, nombre, email FROM usuario WHERE idUsuario = ?',
+            'SELECT idUsuario, nombre, email, foto_perfil FROM usuario WHERE idUsuario = ?',
             [idUsuario]
         );
 
